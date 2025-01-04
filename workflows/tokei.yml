@@ -1,0 +1,63 @@
+name: Tokei Stats
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  tokei-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v3
+
+      - name: Install Rust (if needed)
+        uses: dtolnay/rust-toolchain@stable
+        # Or you can install Rust manually with:
+        # run: |
+        #   sudo apt-get update
+        #   sudo apt-get install -y curl
+        #   curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
+        #   source $HOME/.cargo/env
+
+      - name: Install Tokei
+        run: cargo install tokei
+
+      - name: Run Tokei and save stats to JSON
+        run: tokei --output json . > tokei-stats.json
+
+      - name: Upload stats as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: tokei-stats
+          path: tokei-stats.json
+
+      - name: Generate Stats Markdown
+        id: generate-markdown
+        run: |
+          # Convert Tokei’s JSON to a nicer Markdown table.
+          # We'll just do a quick example in Bash/Awk/Node/etc.
+          # For larger projects, you might have a script to parse the JSON thoroughly.
+          echo "# Tokei Stats" > stats.md
+          echo '```json' >> stats.md
+          cat tokei-stats.json >> stats.md
+          echo '```' >> stats.md
+
+      - name: Upload stats as a Pull Request comment
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const statsMarkdown = fs.readFileSync('stats.md', 'utf-8');
+
+            // Post as a comment on the PR
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: statsMarkdown
+            });
