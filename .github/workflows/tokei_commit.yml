@@ -1,0 +1,35 @@
+name: Tokei Stats (On Demand)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  tokei-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install Tokei
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cargo
+          cargo install tokei
+
+      - name: Run Tokei
+        run: |
+          tokei --output json . > tokei-stats.json
+          echo "Tokei stats generated!"
+
+      - name: Commit Stats
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add stats/commit-stats.txt
+          git commit -m "Update commit statistics [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
