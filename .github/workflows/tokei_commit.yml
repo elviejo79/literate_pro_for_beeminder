@@ -33,3 +33,4 @@ jobs:
             author_email: agarciafdz@gmail.com
             message: 'Update code stats'
             add: 'tokei-stats.json'
+            token: ${{ secrets.GITHUB_TOKEN }}
