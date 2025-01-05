@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Tokei
         run: |
-          tokei --output json | jfo --query-file docs/stats/add_total_to_markdown.jsonata | gron > docs/stats/tokei-stats.gron
+          tokei --output json | jfq --query-file docs/stats/add_total_to_markdown.jsonata | gron > docs/stats/tokei-stats.gron
           echo "Tokei stats generated!"
 
       - name: Commit Stats
