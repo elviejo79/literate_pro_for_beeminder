@@ -32,4 +32,4 @@ jobs:
             author_name: Alejandro Garcia
             author_email: agarciafdz@gmail.com
             message: 'Update code stats'
-            add: 'tokei-stats.js'
+            add: 'tokei-stats.json'
