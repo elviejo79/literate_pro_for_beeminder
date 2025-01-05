@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: actions/checkout@v2
         with:
           persist-credentials: true
 
@@ -33,4 +33,4 @@ jobs:
             author_email: agarciafdz@gmail.com
             message: 'Update code stats'
             add: 'tokei-stats.json'
-            token: ${{ secrets.GITHUB_TOKEN }}
+            github_token: ${{ secrets.GITHUB_TOKEN }}
