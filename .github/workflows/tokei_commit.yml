@@ -23,7 +23,7 @@ jobs:
 
       - name: Run Tokei
         run: |
-          tokei --output json . > tokei-stats.json
+          tokei --output json > tokei-stats.json
           echo "Tokei stats generated!"
 
       - name: Commit Stats
@@ -33,4 +33,4 @@ jobs:
             author_email: agarciafdz@gmail.com
             message: 'Update code stats'
             add: 'tokei-stats.json'
-            github_token: ${{ secrets.GITHUB_TOKEN }}
+            github_token: ${{ secrets.END_BUG_ADD_COMMIT }}
