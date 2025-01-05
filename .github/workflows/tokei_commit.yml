@@ -24,9 +24,17 @@ jobs:
       - name: Install jfq for jsonata
         run: |
           npm install --global jfq
+
       - name: Install gron
         run: |
-          go install github.com/tomnomnom/gron@latest
+          # Download latest gron Linux build (zipped)
+          wget https://github.com/tomnomnom/gron/releases/latest/download/gron-linux-amd64.zip
+          unzip gron-linux-amd64.zip
+          chmod +x gron
+          sudo mv gron /usr/local/bin/gron
+
+      - name: Verify gron is installed
+        run: gron --version
 
       - name: Run Tokei
         run: |
