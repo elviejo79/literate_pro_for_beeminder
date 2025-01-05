@@ -28,8 +28,8 @@ jobs:
       - name: Install gron
         run: |
           # Download latest gron Linux build (zipped)
-          wget https://github.com/tomnomnom/gron/releases/latest/download/gron-linux-amd64.zip
-          unzip gron-linux-amd64.zip
+          wget https://github.com/tomnomnom/gron/releases/download/v0.7.1/gron-freebsd-amd64-0.7.1.tgz
+          tar -xzvf gron-linux-amd64.zip
           chmod +x gron
           sudo mv gron /usr/local/bin/gron
 
