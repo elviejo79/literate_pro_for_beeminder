@@ -27,11 +27,9 @@ jobs:
           echo "Tokei stats generated!"
 
       - name: Commit Stats
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add tokei-stats.json
-          git commit -m "Update commit statistics [skip ci]"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: EndBug/add-and-commit@v9
+        with:
+            author_name: Alejandro Garcia
+            author_email: agarciafdz@gmail.com
+            message: 'Update code stats'
+            add: 'tokei-stats.js'
