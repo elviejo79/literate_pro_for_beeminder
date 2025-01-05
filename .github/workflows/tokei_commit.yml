@@ -33,4 +33,4 @@ jobs:
             author_email: agarciafdz@gmail.com
             message: 'Update code stats'
             add: 'tokei-stats.json'
-            github_token: ${{ secrets.END_BUG_ADD_COMMIT }}
+            github_token: ${{ secrets.GITHUB_TOKEN }}
