@@ -1,0 +1,196 @@
+{
+  "HTML": {
+    "blanks": 0,
+    "children": {
+      "JavaScript": [
+        {
+          "name": "./docs/index.html",
+          "stats": {
+            "blanks": 0,
+            "blobs": {},
+            "code": 4,
+            "comments": 0
+          }
+        }
+      ]
+    },
+    "code": 17,
+    "comments": 1,
+    "inaccurate": false,
+    "reports": [
+      {
+        "name": "./docs/index.html",
+        "stats": {
+          "blanks": 0,
+          "blobs": {
+            "JavaScript": {
+              "blanks": 0,
+              "blobs": {},
+              "code": 4,
+              "comments": 0
+            }
+          },
+          "code": 17,
+          "comments": 1
+        }
+      }
+    ]
+  },
+  "JSON": {
+    "blanks": 0,
+    "children": {},
+    "code": 0,
+    "comments": 0,
+    "inaccurate": false,
+    "reports": [
+      {
+        "name": "./docs/stats/tokei-stats.json",
+        "stats": {
+          "blanks": 0,
+          "blobs": {},
+          "code": 0,
+          "comments": 0
+        }
+      }
+    ]
+  },
+  "Markdown": {
+    "blanks": 51,
+    "children": {
+      "Bash": [
+        {
+          "name": "./docs/track.md",
+          "stats": {
+            "blanks": 0,
+            "blobs": {},
+            "code": 2,
+            "comments": 0
+          }
+        }
+      ],
+      "Json": [
+        {
+          "name": "./docs/track.md",
+          "stats": {
+            "blanks": 0,
+            "blobs": {},
+            "code": 14,
+            "comments": 0
+          }
+        }
+      ]
+    },
+    "code": 0,
+    "comments": 109,
+    "inaccurate": false,
+    "reports": [
+      {
+        "name": "./docs/README.md",
+        "stats": {
+          "blanks": 1,
+          "blobs": {},
+          "code": 0,
+          "comments": 2
+        }
+      },
+      {
+        "name": "./docs/track.md",
+        "stats": {
+          "blanks": 50,
+          "blobs": {
+            "Bash": {
+              "blanks": 0,
+              "blobs": {},
+              "code": 2,
+              "comments": 0
+            },
+            "Json": {
+              "blanks": 0,
+              "blobs": {},
+              "code": 14,
+              "comments": 0
+            }
+          },
+          "code": 0,
+          "comments": 107
+        }
+      }
+    ]
+  },
+  "Total": {
+    "blanks": 51,
+    "children": {
+      "Html": [
+        {
+          "name": "./docs/index.html",
+          "stats": {
+            "blanks": 0,
+            "blobs": {
+              "JavaScript": {
+                "blanks": 0,
+                "blobs": {},
+                "code": 4,
+                "comments": 0
+              }
+            },
+            "code": 17,
+            "comments": 1
+          }
+        }
+      ],
+      "Json": [
+        {
+          "name": "./docs/stats/tokei-stats.json",
+          "stats": {
+            "blanks": 0,
+            "blobs": {},
+            "code": 0,
+            "comments": 0
+          }
+        }
+      ],
+      "Markdown": [
+        {
+          "name": "./docs/README.md",
+          "stats": {
+            "blanks": 1,
+            "blobs": {},
+            "code": 0,
+            "comments": 2
+          }
+        },
+        {
+          "name": "./docs/track.md",
+          "stats": {
+            "blanks": 50,
+            "blobs": {
+              "Bash": {
+                "blanks": 0,
+                "blobs": {},
+                "code": 2,
+                "comments": 0
+              },
+              "Json": {
+                "blanks": 0,
+                "blobs": {},
+                "code": 14,
+                "comments": 0
+              }
+            },
+            "code": 0,
+            "comments": 107
+          }
+        },
+        {
+          "Total": {
+            "code": 16
+          }
+        }
+      ]
+    },
+    "code": 17,
+    "comments": 110,
+    "inaccurate": false,
+    "reports": []
+  }
+}

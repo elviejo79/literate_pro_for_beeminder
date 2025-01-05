@@ -1,0 +1,6 @@
+(
+$md_total_code := Total.children.Markdown.**.code ~> $sum;
+$md := Total.children.Markdown ~> $append({'Total':{"code":$md_total_code}});
+
+$ ~> | Total.children| {"Markdown": $md}|
+)
