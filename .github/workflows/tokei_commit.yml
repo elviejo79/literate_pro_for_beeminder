@@ -18,7 +18,6 @@ jobs:
       - name: Install Tokei
         run: |
           sudo apt-get update
-          sudo apt-get -y install gron
           sudo apt-get install -y cargo
           cargo install tokei
 
@@ -26,12 +25,16 @@ jobs:
         run: |
           npm install --global jfq
 
-      - name: Verify gron is installed
-        run: gron --version
-
-      - name: Run Tokei
+      - name: Install Gron
         run: |
-          tokei --output json | jfq --query-file docs/stats/add_total_to_markdown.jsonata | gron > docs/stats/tokei-stats.gron
+          sudo apt-get -y install gron
+          gron --version
+
+      - name: Calculate Stats
+        run: |
+          tokei --output json |
+          jfq --query-file docs/stats/add_total_to_markdown.jsonata |
+          gron > docs/stats/tokei-stats.gron
           echo "Tokei stats generated!"
 
       - name: Commit Stats
