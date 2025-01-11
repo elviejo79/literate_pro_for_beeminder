@@ -21,7 +21,7 @@ We will use the notation “\<marker\>” to indicate a placeholder for programm
 
 The format of a class declaration is:
 
-```eiffel
+```python
 class <class name>
 inherit <parent class name>
         <feature adaptations>
