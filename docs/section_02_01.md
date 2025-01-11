@@ -9,13 +9,10 @@ When a compiler processes Eiffel code, it is usually all in one font, but some E
 Everything between a “——” and the end of a line is a comment and is skipped by the compiler.
 Semicolons (“;”) separate program statements.
 
----
-
 Let us now step through the LETTER example.
 As promised, we restrict ourselves to those aspects of EKiffel’s syntax and semantics that are relevant to the subject at hand.
 We will use the notation “\<marker\>” to indicate a placeholder for programmer-supplied code.
 
----
 
 ### 2.1.1 Class Declaration
 
