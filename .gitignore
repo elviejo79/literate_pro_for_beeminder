@@ -16,3 +16,12 @@ _site/
 # counterproductive to check this file into the repository.
 # Details at https://github.com/github/pages-gem/issues/768
 Gemfile.lock
+
+# Created by https://www.toptal.com/developers/gitignore/api/eiffelstudio
+# Edit at https://www.toptal.com/developers/gitignore?templates=eiffelstudio
+
+### EiffelStudio ###
+# The compilation directory
+EIFGENs
+
+# End of https://www.toptal.com/developers/gitignore/api/eiffelstudio
