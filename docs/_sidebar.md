@@ -1,4 +1,6 @@
 - HOME
 
-- Chapter 2
-    - [Section 2.1](section_02_01.md)
+- Part I Introduction
+    - 1 Objectstructures
+    - [2 Objects and Classes](2_Objects_and_Classes.md)
+
