@@ -8,15 +8,17 @@ adapting to the syntax and limitations or advantages of a different language sho
 it is just a matter of reading a good book on that language and working with it. 
 
 We will introduce aspects of Eiffel as needed. 
-Readers who are uncomfortable with this approach are referred to Robert Switzer's "Eiffel: An Introduction" [^10]. 
-The definitive book on the language Eiffel (meant to be detailed enough for Eiffel compiler writers) is Bertrand Meyer's "Eiffel: The Language" [^5]. 
+Readers who are uncomfortable with this approach are referred to Robert Switzer's "Eiffel: An Introduction"[#10]. 
+The definitive book on the language Eiffel (meant to be detailed enough for Eiffel compiler writers) is Bertrand Meyer's "Eiffel: The Language"[#5]. 
+
 As an illustration, we will create a class of letters 
 (the kind that make up words, not the kind that get delivered). 
 We will use letter objects in later chapters, 
 where our object structures will need "guinea pigs" to track.
 
-[^10]: TODO
-[^5]: TODO
+[#10]: TODO Reference for Eiffel an introduction
+
+[#5]: TODO Reerence for Eiffil the language
 
 ## 2.1 Objects and Classes in Eiffel
 
@@ -137,7 +139,7 @@ it is usually all in one font,
 but some Eiffel code editors may offer this typesetting convention to programmers.
 
 Everything between a “——” and the end of a line is a comment and is skipped by the compiler.
-Semicolons (“;”) separate program statements. [^semicolons]
+Semicolons (“;”) separate program statements. [^2]
 
 Let us now step through the LETTER example.
 As promised, 
@@ -253,5 +255,142 @@ The expressions listed in the class invariant must be true about any object of t
 They define what it means for an object of this class to be valid.  
 A feature may make these assertions temporarily untrue while it is executing, but it must restore their truthfulness before it is finished.  
 
-[semicolons]: Semicolons in Eiffel are optional in most situations.
+[2]: Semicolons in Eiffel are optional in most situations.
 However, the Eiffel style guidelines [5, Appendix A] recommend their use.*
+
+### 2.1.5 The if Statement
+
+The form of the if statement is
+
+```python
+if <condition> then
+  <things to do if the condition is true>
+else
+  <things to do if the condition is false>
+end;
+```
+
+The “else” part may be omitted.
+(Programmers of Pascal, C, and other languages
+that use the Algol-60 form of if, take note: There is no “begin,” and the end is
+required.)
+
+It takes only one condition to select one of two choices. In some situations,
+there are several choices, distinguished by several conditions:
+
+```python
+if <Condition 1> then
+  <things to do if Condition 1 is true>
+elseif <Condition 2> then
+  <things to do if Condition 1 is false and Condition 2 is true>
+elseif <Condition n> then
+  <things to do if Conditions 1—(n — 1) are false and Condition n is true>
+else
+  <things to do if Conditions 1—n are false>
+end;
+```
+
+(The short form of the if statement is just the long form with zero *elseif* parts.)
+
+### 2.1.6 Odds and Ends
+
+“:=” is the assignment operator (pronounced “gets”). “<=” stands for “≤”. 
+The Boolean operators *and* and *or* evaluate both of their sides.[^5]
+
+[5]: The compiler’s optimizer may decide that only one side needs to be evaluated,
+but a programmer cannot count on it. 
+Eiffel also provides short-circuiting forms (“or else” and “and then”),
+which will be discussed in Section 3.1.1.
+
+## 2.2 Requesting a Feature of an Object
+
+Another object would use our class declaration along the lines shown in Listing 2.2.
+We already saw how to declare an object’s entity.
+Listing 2.2 does something very similar to declare an entity called a_letter of type LETTER:
+it uses a local section to declare an entity local to the feature test.
+The name “a_letter” refers to that particular entity only within the scope of routine test.
+
+### 2.2.1 Creating an Object
+
+The statement `letter.make('J')`
+instructs the Eiffel system to allocate a new object of class LETTER and makes
+entity a_letter refer to that object.
+Then it asks that object to initialize itself
+by executing the creation routine make(initial: CHARACTER) with initial set to: `'J'`.
+
+The purpose of a creation routine is to turn a blank blob of memory into an
+object that is a valid member of this class 
+(in other words, one for which the class invariant is true).
+
+```python
+class LETTER_TESTER
+creation 
+  test
+feature
+  test is
+    ——Test an object of class LETTER.
+  local
+    a_letter: LETTER;
+  do
+    a_letter.make('J');
+    print("The letter ");
+    print (a_letter);
+    print(" is number ");
+    print (a_letter.alphabet_ position);
+    print(" in the alphabet .%N");
+    check
+      a_letter.is_upper_case;
+    end;
+
+    a_letter.set_character('k');
+    print("The letter ");
+    print (a_letter);
+    print(" is number ");
+    print (a_letter.alphabet_position);
+    print(" in the alphabet.%N");
+    check
+      a_letter.is_lower_case;
+    end;
+
+    print("%NTest finished. %N");
+  end; ——test
+end —-class LETTER_TESTER
+```
+
+Listing 2.2 An example of using an object of class LETTER.
+
+### 2.2.2 Requesting a Feature
+
+The form of requesting a feature of an object[^6] is
+
+```python
+<anything that identifies the object>.<feature name>(<actual parameters>)
+```
+
+If there are no parameters, omit the `(<actual parameters>)`.
+
+Usually, an entity name will appear to the left of the dot,
+but it can be anything that identifies an object. 
+For example, “a_letter.character” results in an object of type CHARACTER,
+and we can request features of it without assigning it to an entity.
+Thus, 
+
+```python
+a_letter.character.code.out
+```
+
+performs the following three actions:
+
+1. Feature character is requested of the LETTER object identified by entity a_letter,
+  and it results in an object of type CHARACTER.
+
+2. Feature code is requested of that CHARACTER object,
+  and it results in an object of type INTEGER
+  (whose value is, on most systems, the ASCII representation of that character).
+
+[6]: Other names for asking an object to do something are 
+    “sending a message to the object”
+    and “calling a feature of the object.”
+
+TODO_NEXT_START_PAGE 42
+make a script tha takes the above numbe runs pdftotex from page 42 + 3 and appends it to the text where the above line was done, bonus poing to get chrome to open the book in that page.
