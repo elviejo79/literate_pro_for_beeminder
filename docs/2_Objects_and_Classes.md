@@ -388,9 +388,186 @@ performs the following three actions:
   and it results in an object of type INTEGER
   (whose value is, on most systems, the ASCII representation of that character).
 
-[6]: Other names for asking an object to do something are 
-    “sending a message to the object”
-    and “calling a feature of the object.”
+3. Feature out is requested of that INTEGER object,
+  and it results in the string of decimal digit characters that a human reader would interpret as that number.
 
-TODO_NEXT_START_PAGE 42
+It is important to know what exactly happens when a string of feature requests like this is encountered,
+but all one needs to remember is that only one feature can be requested of an object at a time.
+With this in mind, there is only one possible way to interpret the statement in the above example:
+`((a_letter.char-acter).code).out`
+(in fact, it could be written with the parentheses, but they are not needed).
+When an object requests a feature that happens to be an entity,
+it may use its value but may not change it.
+For instance,
+
+```python
+print(a_letter.character)
+```
+
+is perfectly reasonable, but
+
+!!! Warning
+    Invalid Eiffel!   `a_letter.character := 'Q’`
+
+is illegal. 
+
+!!! Tip
+    This has changed in latter versions of eiffel with the getters and setters.
+
+Thus, features that are entities behave exactly like features that are functions with no parameters.
+
+This allows an author of a class to change the implementation of a feature from computing it “on the fly” using a function to storing it in an entity,
+without bothering the objects that use that feature.
+
+
+It is also possible to omit the “<anything that identifies the object>.” part.
+In that case, the feature is implicitly requested of the object that is executing the statement. For example,
+
+```python
+print(a_letter);
+```
+
+requests the feature print of the current object
+(the member of class LETTER_TESTER that is executing that line).
+
+There is also a way to refer to the current object explicitly.
+There is an automatic feature called “Current” which always refers to the current object.[^7]
+Thus, another way to write the above print request is
+
+```python
+Current.print(a_letter);
+```
+
+
+[7]: It is safe to pretend that Current is inherited from ANY,
+    though for reasons too technical to discuss here it is not.
+
+### 2.2.3 Creation Routines vs. Regular Features
+In the LETTER example,
+routines `make(initial:CHARACTER)` and `set_character (initial: CHARACTER)` are very similar.
+Yet, they are requested quite differently in our example:
+
+```python
+{a_letter}.make('x');
+```
+
+versus
+
+```python
+a_letter.set_character(' x’ );
+```
+
+`{a_letter}` creates a blank object and `.make(’ x’ )` initializes it.
+We could not have just said `a_letter.make('x')`
+(without the `{ ..}`), 
+because `a_letter` was not referring to any object of class LETTER yet!
+
+Outside of a creation statement, 
+all features (creation or noncreation) can be requested of valid objects,
+and only of valid objects.
+(Recall that an object is valid if and only if it has been created and it obeys its class invariant.)
+
+Creation routines, however, are special. 
+They may be used in creation statements, 
+and the invariant is moot until a creation routine is finished initializing the object.
+
+Thus, though make and set_character happen to perform the same actions in their do section,
+they are intended for fundamentally different purposes:
+make is intended to initialize a newly created object,
+while set_character is meant to modify one that already exists.
+
+But despite the fact that we intend to use them in different circumstances,
+make and set_character are identical.
+As a shortcut, Eiffel provides a way to declare them both at the same time, as shown in Listing 2.3.
+
+Note that we are still restricted to using the name `make` in creation statements,
+since it was the only name we listed in the creation part of the class LETTER declaration.
+
+```python
+make, set_character(contents: CHARACTER)
+  ——Make the letter contain contents.
+  require
+      (‘a’ <= contents and contents <=     'z')or
+      (’A’ <= contents and contents <=     'Z')
+  do
+    character := contents;
+  end; ——make, set_character
+```
+[Listing [2.3] When two routines happen to do the same thing, they can be declared simultaneously]
+
+### 2.2.4 How print Works
+The routine `print(x)`,
+inherited from class ANY,
+prints out the string that is the result of `x.out`.
+If the object passed to `print` is a *STRING* that contains a percent sign `(’%’)`
+(as does the constant string `" in the alphabet .%N"`),
+then the feature out defined in class STRING will perform some formatting transformations. 
+For instance, the `%N` gets replaced with a “new line” output command
+(usually a “carriage return, line feed” sequence).
+
+## 2.3 Inside, Outside
+Objects have solid shells.
+It is not possible for one object to manipulate entities within another object without the latter’s cooperation.
+The feature section can specify what types of objects may request the features listed within it by listing those types in curly braces (`{...}`)
+after the word `feature` 
+(for example, `feature {LETTER}`).
+Features listed in a `feature {X}` part may be requested by an object only if its class is X or an heir of X.
+The predefined type `NONE` is used to protect features that are nobody’s business but the object’s: `feature {NONE}`.
+If the type restriction is omitted, then `feature {ANY}` is assumed.
+Since all classes are heirs of ANY, any object may request those features.
+The external view of a letter object,
+such as the one identified by entity `a_letter` of [Listing 2.2],
+is shown in Figure 2.1:
+
+```mermaid
+---
+title: Figure 2.1 and 2.2 The inside and aoutside view of class LETTER
+---
+classDiagram
+class a_letter{
+  +make()
+  +character()
+  +out()
+  +set_character()
+  +is_upper_case()
+  +is_lowwer_case()
+  +alphabet_position()
+  -character
+}
+```
+[Figure [2.1] The outside view of an object of class LETTER]
+
+The hard shell hides all internal features,
+but buttons are provided for requesting the advertised ones
+(called “exported features”).
+
+On the other hand, the inside view
+(visible only to the program segments within the definition of the object’s class and of the heirs of its class),
+shown in Figure 2.2,
+includes the fact that character is an entity,
+thus allowing assignments of objects to it.
+It would also include all the `feature {NONE}` features, if we had any.
+
+## Summary
+Objects are software components encased in shells.
+An object’s internal representation cannot be accessed directly from the outside; 
+instead, one utilizes the features of an object to communicate with it.
+When a feature is requested,
+the object decides how to accommodate the request.
+Objects that behave the same way under the same circumstances are members of a class.
+A class definition in Eiffel specifies what features objects in that
+class make available to other objects,
+and how those features are implemented.
+
+The class definition also includes the class invariant,
+which is a set of Boolean expressions (assertions) that are true about all objects in that class.
+An object that obeys its invariant is said to be valid.
+Creation routines take an uninitialized new object and make it valid.
+All features of the class must maintain the validity of its objects.
+
+## Exercise
+
+1. Use your Eiffel system to compile LETTER and LETTER_TESTER and run LETTER_TESTER’s test feature.
+
+TODO_NEXT_START_PAGE 46
 make a script tha takes the above numbe runs pdftotex from page 42 + 3 and appends it to the text where the above line was done, bonus poing to get chrome to open the book in that page.
