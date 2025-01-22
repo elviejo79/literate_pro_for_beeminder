@@ -520,9 +520,6 @@ such as the one identified by entity `a_letter` of [Listing 2.2],
 is shown in Figure 2.1:
 
 ```mermaid
----
-title: Figure 2.1 and 2.2 The inside and aoutside view of class LETTER
----
 classDiagram
 class a_letter{
   +make()
@@ -535,6 +532,7 @@ class a_letter{
   -character
 }
 ```
+
 [Figure [2.1] The outside view of an object of class LETTER]
 
 The hard shell hides all internal features,
