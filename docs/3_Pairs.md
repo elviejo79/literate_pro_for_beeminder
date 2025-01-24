@@ -24,8 +24,8 @@ and also a skeleton of the class definition in Listing 3.1.
 ```mermaid
 classDiagram
 class a_pair{
-  - first object
-  - second object
+  - first_object
+  - second_object
   + make()
   + first()
   + set_first()
@@ -34,6 +34,7 @@ class a_pair{
   + out
 }
 ```
+
 Figure 3.1 A PAIR object. Its job is to keep track of two objects.
 Figure 3.2 The outside view of an object of class PAIR.
 
