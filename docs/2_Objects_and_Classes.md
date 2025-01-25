@@ -61,63 +61,83 @@ Note the naming and capitalization conventions:
 
 
 ```python
-      $ cd $TESTDIR
-      $ ec -config ./2_code_examples/project.ecf -pretty ./2_code_examples/letter2.e | expand -i --tabs 2
+       $ cd $TESTDIR
+       $ ./code-listing for ./ch2_code/letter.e ./ch2_code/ch2.ecf
+       note
+         description: "Example code for Ch. 2 of Objectstructures {LETTER}."
+         author: ""
+         date: "$Date$"
+         revision: "$Revision$"
+       
+       class LETTER
+       
+       inherit
+         ANY
+           redefine
+             out
+           end;
+       create
+         make
+       feature
+         character: CHARACTER;
+           --The character representation of the letter.
+         make (initial: CHARACTER)
+             --Create a new letter, load it with initial.
+           require
+           do
+             character := initial
+           end;
+       
+         set_character (new: CHARACTER)
+             -- Change the letter to new.
+           require (('a' <= new and new <= 'z') or ('A' <= new and new <= 'Z')) do
+             character := new
+           end;
+       
+         is_lower_case: BOOLEAN
+             -- Is this a lower case letter?
+           do
+             Result := 'a' <= character and character <= 'z'
+           end;
+       
+         is_upper_case: BOOLEAN
+             -- Is this an upper case letter?
+           do
+             Result := 'A' <= character and character <= 'Z'
+           end;
+       
+         alphabet_position: INTEGER
+             -- Relative position in the English alphabet (A = 1).
+           do
+             if is_upper_case then
+               Result := character.code - ('A').code + 1
+             else
+               Result := character.code - ('a').code + 1
+             end;
+           end;
+       
+         out: STRING
+             -- String representation of this letter.
+           do
+             Result := character.out
+           end;
+       
+       invariant
+         either_upper_or_lower: is_upper_case /= is_lower_case
+       
+       end
       class LETTER
       
       inherit
-        ANY
-          redefine
-            out
-          end;
       creation
-        make
       feature
-        character: CHARACTER;
-          --The character representation of the letter.
-        make (initial: CHARECTER)
-            --Create a new letter, load it with initial.
-          require
-          do
-            character := initial
-          end;
       
-        set_character (new: CHARACTER)
-            -- Change the letter to new.
-          require (('a' <= new and new <= 'z') or ('A' <= new and new <= 'Z')) do
-            character := new
-          end;
       
-        is_lower_case: BOOLEAN
-            -- Is this a lower case letter?
-          do
-            Result := 'a' <= character and character <= 'z'
-          end;
       
-        is_upper_case: BOOLEAN
-            -- Is this an upper case letter?
-          do
-            Result := 'A' <= character and character <= 'Z'
-          end;
       
-        alphabet_position: INTEGER
-            -- Relative position in the English alphabet (A = 1).
-          do
-            if is_upper_case then
-              Result := character.code - ('A').code + 1
-            else
-              Result := character.code - ('a').code + 1
-            end;
-          end;
       
-        out: STRING
-            -- String representation of this letter.
-          do
-            Result := character.out
-          end;
       
       invariant
-        either upper_or_lower: is_upper_case /= is_lower_case
       
       end
     
@@ -323,38 +343,53 @@ object that is a valid member of this class
 (in other words, one for which the class invariant is true).
 
 ```python
-class LETTER_TESTER
-creation 
-  test
-feature
-  test is
-    ——Test an object of class LETTER.
-  local
-    a_letter: LETTER;
-  do
-    a_letter.make('J');
-    print("The letter ");
-    print (a_letter);
-    print(" is number ");
-    print (a_letter.alphabet_ position);
-    print(" in the alphabet .%N");
-    check
-      a_letter.is_upper_case;
-    end;
-
-    a_letter.set_character('k');
-    print("The letter ");
-    print (a_letter);
-    print(" is number ");
-    print (a_letter.alphabet_position);
-    print(" in the alphabet.%N");
-    check
-      a_letter.is_lower_case;
-    end;
-
-    print("%NTest finished. %N");
-  end; ——test
-end —-class LETTER_TESTER
+       $ cd $TESTDIR
+       $ ./code-listing for ./ch2_code/application.e ./ch2_code/ch2.ecf
+       note
+         description: "ch2 application root class"
+         date: "$Date$"
+         revision: "$Revision$"
+       
+       class
+         APPLICATION
+       
+       inherit
+         ARGUMENTS_32
+       
+       create
+         make
+       
+       feature {NONE} -- Initialization
+       
+         make
+             -- Run application.
+           local
+             a_letter: LETTER;
+           do
+             create a_letter.make ('J');
+             print ("The letter ");
+             print (a_letter);
+             print (" is number ");
+             print (a_letter.alphabet_position);
+             print (" in the alphabet .%N");
+             check
+               a_letter.is_upper_case;
+             end;
+       
+             a_letter.set_character ('k');
+             print ("The letter ");
+             print (a_letter);
+             print (" is number ");
+             print (a_letter.alphabet_position);
+             print (" in the alphabet.%N");
+             check
+               a_letter.is_lower_case;
+             end;
+       
+             print ("%NTest finished. %N");
+           end
+       
+       end
 ```
 
 Listing 2.2 An example of using an object of class LETTER.
@@ -566,6 +601,47 @@ All features of the class must maintain the validity of its objects.
 ## Exercise
 
 1. Use your Eiffel system to compile LETTER and LETTER_TESTER and run LETTER_TESTER’s test feature.
+
+!!! note
+    In this solution I have included unit testing by inheriting from EQA_TEST
+
+```python
+       $ cd $TESTDIR
+       $ ./code-listing for ./ch2_code/test_letter.e ./ch2_code/ch2.ecf
+       note
+         description: "[
+             Eiffel tests that can be executed by testing tool.
+           ]"
+         author: "EiffelStudio test wizard"
+         date: "$Date$"
+         revision: "$Revision$"
+         testing: "type/manual"
+       
+       class
+         TEST_LETTER
+       
+       inherit
+         EQA_TEST_SET
+       
+       feature
+         test_creation
+             --Test an object of class LETTER
+           local
+             a_letter: LETTER
+           do
+             create a_letter.make ('J')
+       
+             assert ("it must be uppercase", a_letter.is_upper_case)
+             assert ("it must be what is capital J position", 10 = a_letter.alphabet_position)
+       
+             a_letter.set_character ('k')
+             assert ("the new letter must be number", 11 = a_letter.alphabet_position)
+             assert ("must be lower case", a_letter.is_lower_case)
+           end
+       
+       end
+       
+```
 
 TODO_NEXT_START_PAGE 46
 make a script tha takes the above numbe runs pdftotex from page 42 + 3 and appends it to the text where the above line was done, bonus poing to get chrome to open the book in that page.
