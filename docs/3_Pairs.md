@@ -144,3 +144,123 @@ we must make it clear when
 it can be used and what can be expected of it.
 This clarification will form a **contract** between the programmer who writes class PAIR (“the supplier”)
 and the programmer who uses objects of that class (“the user”).
+
+A **contract** consists of five components:
+
+1. The names of public features;
+2. The types of parameters the public features take and the types of values in which they result;
+3. The preconditions of the public features, which specify what must be true when a feature is invoked (the user’s obligation);
+4. The postconditions of the public features, which specify what can be
+expected to be true after a feature is finished doing its work
+(the supplier’s obligation); and
+5. The class invariant, which specifies (using only the public information,
+of course)
+what must be true about any valid object of this class.
+
+Postconditions are listed in an ensure section at the end of a feature declaration.
+Its syntax is identical to that of the require sections we used in Chapter 2 to list the preconditions.
+
+Let us consider each feature’s part of the contract.
+The first is make, a creation routine.
+What distinguishes creation routines from other features is their
+ability to work in situations where the object is not valid
+(i.e., the invariant is unsatisfied),
+as is often the case right after memory is allocated for the new
+object.
+A creation routine takes a blank blob of memory and turns it into a
+valid object.
+In fact, all features —not just creation routines— 
+have to leave the object that executes them in a state where the class invariant is true.
+
+Since `make` accepts its task under any circumstances,
+it has no preconditions and hence no require section.
+Since it does not promise anything more
+than the standard “the object is valid” condition,
+it has no postconditions and no ensure section.
+
+Next is `set_first`.
+Since it is not a creation routine,
+it will be executed only by objects that are already valid.
+
+Should it require its parameter, `an_item`, to be valid also? 
+Do we care if we are told to make the first item of a `PAIR` void?
+We don’t if the user only plans to retrieve it back by requesting the feature `first`:
+In this case, we can just follow the “garbage in, garbage out” principle.
+Only if the user tries to get the string representation of the pair
+(using the out feature)
+will there be trouble,
+but the user may have no plans to do that.
+Thus, we will not insist on getting valid items through set_first,
+and put in a check for void items into feature out,
+displaying something reasonable in that case
+(we will attend to out a little later).
+This leaves set_first with no preconditions.
+
+How about the postconditions? What can we promise to the user?
+We can definitely promise that after the set_first(an_item) is performed,
+a first request will result in the same an_item.
+
+Can we promise anything about second?
+We can specify that there will not be any side effect on the second item in the pair.
+This would preclude the kind of pair-based structures in which the objects first and second are interconnected in a certain way,
+so in general we don’t want to make such a promise.
+However, let us go ahead and make it just to see how it can be done.
+
+We use the operator old, which returns the value of an expression as it was
+before the routine was invoked:
+
+``` note
+    work in progress
+    ```pythan
+    ensure
+        first_was_replaced: first = an_item;
+    second_is_unchanged: second = old second;
+    ```
+
+(We label the assertions with the names “first_was_replaced” and “second_is_ unchanged” so that if one of them is violated when we execute the program, the error message will include its label.)
+
+So far so good, but second_is_unchanged is not quite right.
+All it says is that the reference to the item in the second position will be unchanged,
+i.e., that the entity second is tracking the same item as before.
+It does not say that the item’s value will be unchanged.
+For that, we need to use the standard
+feature    `is_equal: “second.is_equal(old second)”`
+(inherited from ANY).
+So, our next attempt at the postcondition is
+
+!!! note
+    work in progress
+    ```python
+    ensure
+        first_was_replaced: first = an_item;
+        second_is_same: second = old second;
+        second_is_unchanged: second.is_equal(old second);
+    ```
+
+This assumes that is_equal is a feature of class ITEM2.
+Since ANY provides that feature to its heirs, that is a safe bet.
+If a class refuses to provide is_equal, its members cannot be tracked by our pairs.
+
+Unfortunately, second_is_unchanged is still wrong.
+In fact, there are two problems with it.
+The first is that when set_first is requested of a newly made
+pair,
+second will not be tracking a valid item yet.
+And since we have decided to
+allow the user to track invalid items in pairs,
+this situation can happen at any
+time.
+But we cannot request is_equal of a void object!
+To guard against that situation,
+a way to say “item is void” is needed.
+
+Eiffel provides, through class ANY,
+a standard object tracked by the feature “Void” that has a unique purpose:
+It is the only object that has the right —nay, obligation!—
+to be invalid.
+If an entity does not yet refer to a valid object
+(for example, when it is not initialized by a creation routine),
+it is automatically made to refer to Void’s object.
+In fact, to make entity *e* let go of the object
+
+NEXT_PAGE: fullbook.pdf:53
