@@ -643,5 +643,22 @@ All features of the class must maintain the validity of its objects.
        
 ```
 
-TODO_NEXT_START_PAGE 46
-make a script tha takes the above numbe runs pdftotex from page 42 + 3 and appends it to the text where the above line was done, bonus poing to get chrome to open the book in that page.
+And then you can also execute the tests from the command line like this:
+
+```python
+       $ cd $TESTDIR
+       $ ec -config ./ch2_code/ch2.ecf -tests
+       Eiffel Compilation Manager
+       Version 22.05.10.6302 Enterprise Edition - linux-x86-64
+       
+       Degree 6: Examining System
+       System Recompiled.
+       Executing 1 tests
+       
+       test_creation (TEST_LETTER): pass
+       
+       Execution complete
+       
+       1 tests total (1 executed, 0 failing, 0 unresolved)
+       
+```
