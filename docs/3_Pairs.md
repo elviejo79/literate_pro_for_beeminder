@@ -262,5 +262,55 @@ If an entity does not yet refer to a valid object
 (for example, when it is not initialized by a creation routine),
 it is automatically made to refer to Void’s object.
 In fact, to make entity *e* let go of the object
+of which it keeps track, we say `e := Void`.
+Thus, an entity that keeps track of
+Void’s object is said to be “invalid” or “void” and we can use the test `e = Void`
+to identify that situation.
+If there is nothing else keeping track of the object that used to be identified by `e`,
+that object is automatically recycled:
+ The memory it occupies is released for other uses
+(this automatic activity is known as **“garbage collection”**).
 
-NEXT_PAGE: fullbook.pdf:53
+But can’t an entity be tracking an object that is not void,
+but is invalid because it got messed up somehow?
+No. Impossible.
+If such was the case,
+the program would have stopped as soon as the class invariant of that object was violated.
+If it reached the point where we are using the object,
+it must be either valid or void.
+
+Given the feature *Void*,
+there are two equivalent ways to express that `second` should be equal to    `**old** second` whenever second is a valid item:
+
+```python
+second_is_unchanged: second /= Void **implies** second.is_equal (**old** second);
+```
+
+(“/=” means “does not equal” in Eiffel) and
+
+```python
+second_is_unchanged: second = Void or else second.is_equal (old second);
+```
+
+Both **implies** and **or else** (as well as **and then**)
+only evaluate the expression on their right if the expression on the left does not decide the result.
+Thus, their meanings are as shown in Table 3.1.
+Using this kind of expression allows us to evaluate `second.is_equal(old second)` only when `second /= Void`.
+Since /x **implies** y/ is logically equivalent to /not x or else y/,
+the choice between them is a matter of taste.
+I prefer the “implies” form.
+
+That takes care of the first problem.
+The second problem is more subtle.
+The tricky part is `**old** second`.
+Since second merely stores the reference to 
+the tracked object, `old second` is just the old value of that reference.
+
+If the object
+Table 3.1 Eiffel operators that do not evaluate their right-hand side unless it is necessary.
+| Operator | Meaning |
+|----------|---------|
+| <left> and then <right> | Compute <left>. If it is **false**, then the answer is **false**, else compute <right> and use its answer.|
+|<left> or else <right>| Compute <left>. If it is true, then the answer is true, else compute <right> and use its answer. |
+|<left> implies <right>| Compute <left>. If it is false, then the answer is true, else compute <right> and use its answer. |
+
