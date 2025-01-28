@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<system xmlns="http://www.eiffel.com/developers/xml/configuration-1-16-0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.eiffel.com/developers/xml/configuration-1-16-0 http://www.eiffel.com/developers/xml/configuration-1-16-0.xsd" name="ch3_code_single_thread" uuid="3A037C10-E8E3-4943-871F-6DACC4D9F7DA">
+	<target name="ch3_code">
+		<root feature="make" class="APPLICATION"/>
+		<option warning="true">
+			<assertions precondition="true" postcondition="true" check="true" invariant="true" loop="true" supplier_precondition="true"/>
+		</option>
+		<file_rule>
+			<exclude>/\.git$</exclude>
+			<exclude>/\.svn$</exclude>
+			<exclude>/CVS$</exclude>
+			<exclude>/EIFGENs$</exclude>
+		</file_rule>
+		<setting name="console_application" value="true"/>
+		<capability>
+			<concurrency support="none"/>
+		</capability>
+		<precompile name="base_pre" location="$ISE_PRECOMP/base-safe.ecf"/>
+		<library name="base" location="$ISE_LIBRARY/library/base/base.ecf"/>
+		<cluster name="ch3_code" location=".\" recursive="true"/>
+	</target>
+</system>

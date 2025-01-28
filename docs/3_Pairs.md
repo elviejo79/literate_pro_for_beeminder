@@ -58,29 +58,20 @@ class PAIR
 create make
 feature
     first:???;
-        ——First item.
     second: ???;
-        ——Second item.
     make
-        ——Initialization.
     do
-        deferred
     end; ——make
 
     set_first (an_item: ???)
-        ——Track an_item as first item.
     do
-        deferred
     end
 
     set_second (an_item: ???)
-        ——Track an_item as second item.
     do
-        deferred
     end; ——set_second
 
     out: STRING
-        ——Printable representation of the pair.
     do
     ...
     end; ——out
@@ -97,40 +88,27 @@ This leads to the class skeleton in Listing 3.2.
 ```python
 class PAIR[UITEM1,ITEM2] 
     inherit
-        ANY
     redefine
-        out
     end;
 
     create
-        make
 feature
     first: ITEM1;
-        ——First item.
     second: ITEM2;
-        ——Second item.
     make
-        ——Initialization.
     do
-        deferred
     end; ——make
 
     set_first (an_item: ITEM1)
-        ——Track an_item as first item.
     do
-        deferred
     end; ——set_first
 
     set_second (an_item: ITEM2)
-        ——Track an_item as second item.
     do
-        deferred
     end; ——set_second
 
     out: STRING
-        ——Printable representation of the pair.
     do
-        deferred
     end; ——out
 end ——class PAIR
 ```
@@ -213,7 +191,6 @@ before the routine was invoked:
     work in progress
     ```pythan
     ensure
-        first_was_replaced: first = an_item;
     second_is_unchanged: second = old second;
     ```
 
@@ -232,9 +209,6 @@ So, our next attempt at the postcondition is
     work in progress
     ```python
     ensure
-        first_was_replaced: first = an_item;
-        second_is_same: second = old second;
-        second_is_unchanged: second.is_equal(old second);
     ```
 
 This assumes that is_equal is a feature of class ITEM2.
@@ -300,17 +274,215 @@ Since /x **implies** y/ is logically equivalent to /not x or else y/,
 the choice between them is a matter of taste.
 I prefer the “implies” form.
 
-That takes care of the first problem.
-The second problem is more subtle.
-The tricky part is `**old** second`.
-Since second merely stores the reference to 
-the tracked object, `old second` is just the old value of that reference.
-
-If the object
 Table 3.1 Eiffel operators that do not evaluate their right-hand side unless it is necessary.
 | Operator | Meaning |
 |----------|---------|
 | <left> and then <right> | Compute <left>. If it is **false**, then the answer is **false**, else compute <right> and use its answer.|
 |<left> or else <right>| Compute <left>. If it is true, then the answer is true, else compute <right> and use its answer. |
 |<left> implies <right>| Compute <left>. If it is false, then the answer is true, else compute <right> and use its answer. |
+
+That takes care of the first problem.
+The second problem is more subtle.
+The tricky part is `**old** second`.
+Since second merely stores the reference to 
+the tracked object, `old second` is just the old value of that reference.
+If the object changed but the reference to it didn’t,
+then both second and old second refer to
+the same object,
+and of course it will report that it is_equal to itself!
+If we are to state that the object did not change,
+we will have to squirrel away a copy of it:
+
+```python
+ensure
+    first_was_replaced: first = an_item
+    second_is_same: second = old second
+    second_is_unchanged: second /= Void implies second.is_equal(old deep_clone(second));
+```
+
+The feature `deep_clone` is also provided by our ancestor `ANY`.
+That will do it for set_first.
+
+Feature `first`, being either an entity
+(as in our current implementation)
+or a function, should not modify any entities of the PAIR object.
+Although we cannot specify postconditions for entities in Eiffel
+(preconditions and postconditions are only possible for routines),
+“nothing about this object changed” is
+always an assumed postcondition with entity and function features.
+(Eiffel programmers almost never allow their functions to change the object,
+although it is permitted by the language.)
+
+What works for `set_first` and `first` also works for `set_second` and `second`,
+except that the roles of first and second are reversed in the postconditions.
+
+While first and second do not care if the two items are valid, `out` does:
+If even one of the items is invalid,
+it will not be able to build a string representation for the pair.
+Thus, we would want the following preconditions for out:
+
+!!! Warnining Invalid for out
+```python
+require
+    first_not_void: first /= Void;
+    second_not_void: second /= Void;
+```
+
+Too bad—we cannot have them.
+Since our out is a redefinition of the one inherited from ANY,
+it is not allowed to have preconditions that are more stringent than those of the original out.
+This restriction is due to the relationship between the contracts of a parent and an heir,
+which we will study in Chapter 4.
+Part of that relationship is that an heir cannot refuse to respond to a feature request under circumstances in which the ancestor would respond to it.
+
+This means that we may be faced with void items.
+There are two ways to deal with a request to produce the string representation of a pair that contains a void item.
+The first is to let an error be generated when we request the out
+feature of the void item.
+This would only happen if one of the preconditions
+desired above had been violated.
+This, of course, is no solution: Since we did not tell the user in the contract not to invoke out when either of the items is void,
+we are responsible for making out work without crashing the program
+even with one or both items being void.
+
+The other way is to fulfill the contractual obligation—buckle down and
+deal with it.
+We could use a predefined string to represent void objects.
+How about “"-void-"”?
+That is what we will do.
+
+Because out, being a function,
+does not change the PAIR object or anything it tracks,
+it has the same implied postconditions as `first` and `second` and any
+other function.
+Finally, we need to consider what to list in the class invariant for `PAIR`:
+nothing.
+As long as a pair exists as a `PAIR` object, it is valid
+(even, as we saw, if one or both of the items it tracks are void).
+Thus, we can omit the **invariant** section of the class definition.
+
+Combined with the class skeleton we had earlier,
+all these assertions give us a skeleton that can serve as the contract (Listing 3.3).
+This completes the definition of PAIR.
+
+```python
+       $ cd $TESTDIR
+       $ ./code-listing for ./ch3_code/pair.e ./ch3_code/ch3_code.ecf
+       note
+         description: "Summary description for {PAIR}."
+         author: ""
+         date: "$Date$"
+         revision: "$Revision$"
+       
+       class PAIR [ITEM1, ITEM2]
+       
+       inherit
+       
+         ANY
+           redefine
+             out
+       
+           end
+       feature
+         first: detachable ITEM1 -- First item.
+         second: detachable ITEM2 -- Second item.
+       
+         make
+             -- Initialization.
+           deferred
+       
+           end
+       
+         set_first (an_item: ITEM1)
+             --Track an_item as first item.
+           deferred
+           ensure
+             first_was_replaced: first = an_item
+             second_is_same: second = old second
+             second_is_unchanged:
+               attached old first as old_first
+               and then attached first as new_first
+               implies
+               new_first.is_equal (old_first.deep_twin)
+           end
+       
+         set_second (an_item: ITEM2)
+             --Track an_item as second item.
+           deferred
+           ensure
+             second_was_replaced: second = an_item
+             first_is_same: first = old first
+             first_is_unchanged:
+               attached old first as old_first
+               and then attached first as new_first
+               implies
+               new_first.is_equal (old_first.deep_twin)
+           end
+       
+         out: STRING
+             --Printable representation of the pair
+             --(void items replaced with "-void-").
+           do
+             if attached first as x and attached second as y then
+               Result := x.out + y.out
+             elseif attached first as x and not attached second then
+               Result := x.out + "-void-"
+             elseif not attached first and attached second as x then
+               Result := "-void" + x.out
+             else
+               Result := "-void-" + "-void-"
+             end
+           end
+       
+       end
+```
+Listing 3.3 Definition of class PAIR, take 3: the contract.
+
+### 3.1.2 How Detailed Should the Contract Be?
+
+On the one hand, the more detailed the contract is,
+the less potential there is for misunderstanding between the user and the supplier.
+As suppliers, we have a vested interest in making the preconditions as detailed as we can;
+it is in the interest of the users to make the postconditions as detailed as possible.
+It is also easier to test the program with detailed contracts:
+As a tester object exercises feature requests in our object structure,
+the preconditions and postconditions are checked automatically.
+
+On the other hand, most of the postconditions are of the form “nothing
+changes” or “almost nothing changes.” 
+In the case of a PAIR object, where there were only two features that could have changed to begin with, 
+it takes three postconditions each in two procedures to state that fact.
+As our object structures get more complicated, this could get out of control.
+There is, however, a shortcut in Eiffel that we can use, and we will consider it when the time comes (in Section 6.4.1).
+
+As with any contract, it is very tempting to adopt global conventions and
+leave things unmentioned explicitly.
+As with any contract, doing so increases the risk of things going wrong.
+In general, we want to make the contract as detailed as possible.
+One exception to this rule is the implicit “nothing changed” postcondition for any function.
+There are two reasons for this exception:
+
+1. Writing a function that causes changes
+(also called “side effects”) is very poor engineering:
+If such a function is used twice in one expression, 
+one cannot be sure which request the compiler will issue first,
+and thus you may get different results from running the same program under different compilers.
+
+2. Since you cannot attach a postcondition to an entity, attaching one to any feature advertises it in the contract as a function and not an entity.
+That, however, should remain an implementation decision:
+If at all possible, we want to leave open the option to store that feature as an entity within the object instead of computing it on-the-fly as a function.
+
+Also, the elaborate scheme we have derived for specifying “nothing else
+changes” tends to be too restrictive and too cumbersome to be useful.
+It is a good illustration on how the keyword old can be used in postconditions,
+as well as how important it is to understand the distinction between a reference to an object and the object itself.
+However, it is rarely used by Hiffel programmers,
+and we will come back to it only once, in Section 6.4.1, when we look at another potentially useful but rarely used technique.
+
+## 3.2 How a PAIR Does What It Does
+
+Now that we have defined what a PAIR is and what it does (the definition),
+we can consider how it does it (an **implementation** of *PAIR*).
+Most object structures can be implemented in several good ways, but there is really only one good way in Eiffel to implement a pair of items of arbitrary types.
+Thus, we will only consider one implementation of PAIR in this text.
 
