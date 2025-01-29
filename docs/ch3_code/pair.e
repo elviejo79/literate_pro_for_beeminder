@@ -13,19 +13,23 @@ inherit
 			out
 
 		end
+create
+	make
+
 feature
 	first: detachable ITEM1 -- First item.
 	second: detachable ITEM2 -- Second item.
 
 	make
 			-- Initialization.
-		deferred
+		do
 
 		end
 
 	set_first (an_item: ITEM1)
 			--Track an_item as first item.
-		deferred
+		do
+			first := an_item
 		ensure
 			first_was_replaced: first = an_item
 			second_is_same: second = old second
@@ -38,7 +42,8 @@ feature
 
 	set_second (an_item: ITEM2)
 			--Track an_item as second item.
-		deferred
+		do
+			second := an_item
 		ensure
 			second_was_replaced: second = an_item
 			first_is_same: first = old first
@@ -54,13 +59,13 @@ feature
 			--(void items replaced with "-void-").
 		do
 			if attached first as x and attached second as y then
-				Result := x.out + y.out
+				Result := "(" + x.out +"," + y.out + ")"
 			elseif attached first as x and not attached second then
-				Result := x.out + "-void-"
+				Result := "(" + x.out + ",-void-)"
 			elseif not attached first and attached second as x then
-				Result := "-void" + x.out
+				Result := "(-void-," + x.out+")"
 			else
-				Result := "-void-" + "-void-"
+				Result := "(-void-, -void-)"
 			end
 		end
 

@@ -4,6 +4,21 @@ use std assert
 def main [] {
 
 }
+
+def "main view" [view_type:string, class_name: string, projectFile :string ] {
+    assert ($view_type in ['short', 'flat']) "the views should be one of the known ones"
+    #assert ( $sourceFile | path exists) "The source file shoud exist"
+
+    let project_name = $projectFile
+    assert ( $project_name | path exists) "The project file shoud exist"
+
+    let temp_dir = (mktemp -d XXX.eiffel)
+    let temp_file = ([$temp_dir $"($class_name).($view_type)"] | path join)
+    ^ec -config $project_name $"-($view_type)" $class_name -file $temp_file
+    cat $temp_file | expand -i --tabs 2
+    rm --recursive --force $temp_dir
+}
+
 def "main for" [sourceFile: string, projectFile? :string ] {
     assert ( $sourceFile | path exists) "The source file shoud exist"
     let project_name = ( $projectFile | default ( $sourceFile | path parse --extension .e | upsert extension { 'ecf' } | path join ))
