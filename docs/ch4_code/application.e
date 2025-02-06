@@ -18,9 +18,12 @@ feature {NONE} -- Initialization
 			-- Test an ENHANCED_PAIR.
 		local
 			pair: ENHANCED_PAIR [LETTER, LETTER]
+			pair_runner: PAIR_RUNNER
 			letter1: LETTER
 			letter2: LETTER
 		do
+			create pair_runner.test
+			
 			create pair.make;
 			print ("New pair created.%N You should see '(-void-,-void-)'")
 			print (pair);

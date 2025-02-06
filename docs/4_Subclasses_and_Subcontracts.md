@@ -175,14 +175,13 @@ already good enough to use with the heir class.[^1]
 But it was mentioned earlier that an heir inherits the parent’s contract too, 
 which means that an object of © the heir class must be able to do everything that its ancestor class’s objects can,
 and do it under the same circumstances, and do it at least as well.
+A user may always substitute an heir’s object for an ancestor's object.
 
 [1]: A common term for “heir class” is “subclass”; the parent class is frequently called the “superclass.”
 
-A user may always substitute an heir’s object for an ancestor's object.
-
 Thus, by saying that one class is an heir of another,
 we say that objects of the heir class can act as objects of the ancestor class.
-For example, an `ENHANCED_PAIR` **can act as a** `PAIR`.?
+For example, an `ENHANCED_PAIR` **can act as a** `PAIR`.[^2]
 
 For instance, objects of class ENHANCED_PAIR must be able to pass the test routine of PAIR_TESTER, since PAIR objects do.
 To do this test, we modify PAIR_TESTER in only one place: the line
@@ -195,13 +194,13 @@ where we create a PAIR object and attach it to entity pair.
 What we want to attach to pair instead is an ENHANCED_PAIR object.
 
 The Eiffel way to specify what class to use when creating a new object is to
-put that class’s name between the two exclamation marks. In fact,
+put that class’s name between the two braces marks. 
 
 ```python
 create pair.make
 ```
 
-is really just a shortcut for saying
+In fact, is really just a shortcut for saying
 
 ```python
 create {PAIR(LETTER,LETTER]} .pair.make
@@ -209,332 +208,249 @@ create {PAIR(LETTER,LETTER]} .pair.make
 
 If you do not specify a class name between the “{...}”, 
 then the class corresponding to the type of the entity is used.
-In this case, since pair is of type
-`PAIR[LETTER,LETTER)]`, objects of class PAIR[LETTER,LETTER]
-are created by default.
+In this case, since pair is of type `PAIR[LETTER,LETTER)]`, objects of class PAIR[LETTER,LETTER] are created by default.
 
 However, since objects of class `ENHANCED_PAIR` can do whatever `PAIR`
-objects can, it is perfectly safe and legal to create an ENHANCED_PAIR [LETTER,LETTER] object 
+objects can, it is perfectly safe and legal to create an `ENHANCED_PAIR [LETTER,LETTER]` object 
 instead of the PAIR[LETTER, LETTER] object:
-'ENHANCED_PAIR(LETTER,LETTER]!pair.make;
-The PAIR_TESTER class in Listing 4.3 is just like the one in Listing 3.6, but it
-tests an ENHANCED_PAIR object in its capacity as a PAIR object.
-Note that
-the entity pair is still of type PAIR, not ENHANCED_PAIR.
-2Many object-oriented design texts state that the relationship is “...isa...
-9
-instead of “...
-can act asa...
-.” In Section 4.4 we discuss why that is an inaccurate
-description.
 
 ```python
-class PAIR_TESTER
-creation test
-feature
-test is
-——Test a PAIR.
-local
-pair: PAIR[|LETTER,LETTER);
-letter1: LETTER;
-letter2: LETTER;
-do
-!ENHANCED_PAIR( LETTER, LETTER]!
-pair.make;
-print ("New pair created.%N You should see’ (-void-,-void-)’:
-print (pair);
-print ("SN");
-'"Wetter1.make('a’);
-pair.set_first (letter 1);
-print("First
-item set to ’a’.%N You should see’ (a,-void-)’:
-
-print (pair);
-print ("SN");
-"Jetter2.make('b’);
-
-pair.set_second (letter2);
-print ("Second
-print ( pair);
-print("SN%NTestitem set to ‘’b’.%N You should see '’(a,b)’: done. %N");
-end; —-—test
-end —-—class PAIR_TESTER
+create {ENHANCED_PAIR(LETTER,LETTER]}.pair.make;
 ```
 
-Listing 4.3 Testing the ablity of ENHANCED_PAIR objects to act as
-PAIR objects.
+The PAIR_TESTER class in Listing 4.3 is just like the one in Listing 3.6, 
+but it tests an ENHANCED_PAIR object in its capacity as a PAIR object.
+Note that the entity pair is still of type PAIR, not ENHANCED_PAIR.
 
-4.3 Subcontracting: Obligations of the Heir
-As the previous section illustrates, because an heir inherits the contract of its
+[2]: Many object-oriented design texts state that the relationship is “...isa..."  instead of “... can act as a...” In Section 4.4 we discuss why that is an inaccurate description.
 
-ancestor, its objects may be called on to act as subcontractors for the ancestor.
+```python
+       $ cd $TESTDIR
+       $ ./code-listing for ./ch4_code/pair_runner.e ./ch4_code/ch4_code.ecf
+       note
+         description: "Summary description for {PAIR_RUNNER}."
+         author: ""
+         date: "$Date$"
+         revision: "$Revision$"
+       
+       class
+         PAIR_RUNNER
+       
+       create
+         test
+       feature
+         test -- Test a PAIR.
+           local
+             pair: PAIR [LETTER, LETTER]
+             letter1: LETTER
+             letter2: LETTER
+           do
+             create {ENHANCED_PAIR [LETTER, LETTER]} pair.make;
+       
+             print ("New pair created.%N You should see (-void-,-void-)")
+             print (pair);
+             print ("%N");
+             create Letter1.make ('a');
+             pair.set_first (letter1);
+             print ("First item set to ’a’.%N You should see’ (a,-void-)")
+             print (pair);
+             print ("%N");
+             create Letter2.make ('b');
+             pair.set_second (letter2);
+             print (pair);
+             print ("%NTestitem set to ‘’b’.%N You should see '’(a,b)’: done. %N")
+           end
+       
+       end
+```
+Listing 4.3 Testing the ablity of ENHANCED_PAIR objects to act as PAIR objects.
+
+## 4.3 Subcontracting: Obligations of the Heir
+
+As the previous section illustrates, because an heir inherits the contract of its ancestor,
+its objects may be called on to act as subcontractors for the ancestor.
 Specifically, if in a given situation a user routine is allowed to request a feature
 of an ancestor object
-(i.e., that feature’s precondition is satisfied), then it is also
-allowed to request that feature of an heir object in the same situation.
+(i.e., that feature’s precondition is satisfied),
+then it is also allowed to request that feature of an heir object in the same situation.
 Therefore, if the heir redefines that feature, it may not add more restrictive preconditions to its part of the contract.
-On the other hand, the subcontractor is certainly allowed to accept the job
-under circumstances that the contractor would have rejected.
-For example,
 
-suppose you rent a dwelling from Olde Fashioned Rentals Corporation and the
-contract for the “accept my rent” feature
+On the other hand, the subcontractor is certainly allowed to accept the job under circumstances that the contractor would have rejected.
+For example, suppose you rent a dwelling from Olde Fashioned Rentals Corporation and the contract for the “accept my rent” feature
 (if you may call it that)
-says:
- “Rent is
-paid by check.” If Olde subcontracts the management of your abode to Plastiphile Property Management, Inc., they may modify the requirement in your
-favor:
- “Rent is paid by check or else rent is paid by credit card.” You would not
-complain about that, would you?
-If your regular routine is to pay by check, you
-will not be affected by the looser precondition.
-Eiffel lets the heir class loosen the precondition of its heir for a routine by
-using a require else part.
-Since you are not permitted to completely disregard
-the heir’s preconditions, a simple require part is not allowed in a redefined
-routine.
+says: “Rent is paid by check.” 
+If Olde subcontracts the management of your abode to Plastiphile Property Management, Inc., 
+they may modify the requirement in your favor:
+“Rent is paid by check **or else** rent is paid by credit card.” 
+You would not complain about that, would you?
+If your regular routine is to pay by check, you will not be affected by the looser precondition.
+
+Eiffel lets the heir class loosen the precondition of its heir for a routine by using a **require else** part.
+Since you are not permitted to completely disregard the heir’s preconditions, 
+a simple **require** part is not allowed in a redefined routine.
 
 The opposite is true for postconditions.
 If Olde promised you a specific
-place to live as a postcondition of the “accept my rent” feature, Plastiphile will
-have to do at least that much.
-They are not allowed to say “..
-.
-or else you get
-a clock radio.” On the other hand, if they said “.
-.
-.
-and then you will have a
-place to park your car,” that would hardly be cause for litigation.
-So the ensure part is not allowed in a redefined routine, but an ensure
-then
+place to live as a postcondition of the “accept my rent” feature, 
+Plastiphile will have to do at least that much.
+They are not allowed to say “... **or else* you get a clock radio.” 
+On the other hand, if they said “... **and then** you will have a place to park your car,” 
+that would hardly be cause for litigation.
 
-part is.
-For example, ENHANCED_PAIR’s
+So the ensure part is not allowed in a redefined routine, but an **ensure then** part is.
+For example, *ENHANCED_PAIR’s* `set_first` can add another promise to its part of the contract:
 
-set_first can add another
-
-promise to its part of the contract:
+```python
 ensure then
+  last_change = 1;
+```
 
-last_change = 1;
-To summarize, when an heir
-(the subcontractor)
-redefines a feature,
+To summarize, when an heir (the subcontractor) redefines a feature,
 
-= Its precondition may be the same as (no require part at all) or more forgiving than (a require else part)
-what it was in the parent
-(the contractor);
-and
+* Its precondition may be the same as (no require part at all) or more forgiving than (a **require else** part) what it was in the parent (the contractor); and
 
-= Its postcondition may be the same as
-(no ensure part at all)
-or stricter
-than (an ensure then part) what it was in the parent.
+* Its postcondition may be the same as (no ensure part at all) or stricter than (an **ensure then** part) what it was in the parent.
 
-4.4 When Subclassing Should Nof Be Used
-It is tempting to call the “can act as a” relationship the “is a” relationship
-instead, and many texts do just that.
-After all, an ENHANCED_PAIR is a
-PAIR, is it not?
+## 4.4 When Subclassing Should Nof Be Used
+
+It is tempting to call the “can act as a” relationship the “is a” relationship instead, and many texts do just that.
+After all, an `ENHANCED_PAIR` is a `PAIR`, is it not?
 
 Yes, it is.
-But the “is a” relationship includes situations that the “can act as
-a” relationship excludes, and vice versa.
-For example, a square is a rectangle,
-but a square cannot subcontract for a rectangle:
- a rectangle may be asked to
+But the “is a” relationship includes situations that the “can act as a” relationship excludes, and vice versa.
+For example, a square is a rectangle, but a square cannot subcontract for a rectangle:
+a rectangle may be asked to take on a 2:1 aspect ratio, but a square is incapable of doing that.
+So, defining SQUARE as an heir to RECTANGLE is impossible.
 
-take on a 2:1 aspect ratio, but a square is incapable of doing that.
-So, defining
-SQUARE as an heir to RECTANGLE is impossible.
+On the other hand, a rectangle can do anything a square can do, 
+so declaring RECTANGLE as an heir to SQUARE is perfectly reasonable.
+Note, however, that while “a rectangle can act as a square” holds, it makes no sense to say that “a rectangle is a square.”
 
-53
+It is unfortunate that many object-oriented texts claim that the relationship between an heir and a parent is “is a.” That claim is just a really old but bad habit.
+One of the “godfathers” of object-oriented programming is the discipline known as “semantic networks,” 
+and connections between nodes of those networks were actually meant to indicate “is a” relationships.
+(In computer science, as in many things, if something does not make sense, look for historical reasons.)
 
-54
+So, don’t worry about what is a what, and think in terms of subcontracting instead.
 
-OBJECT
+## 4.5 What PAIR Should Do As Subcontractor to ANY
 
-STRUCTURES
-
-On the other hand, a rectangle can do anything a square can do, so declaring RECTANGLE as an heir to SQUARE is perfectly reasonable.
-Note, however, that while “a rectangle can act as a square” holds, it makes no sense to
-say that “a rectangle is a square.”
-It is unfortunate that many object-oriented texts claim that the relationship between an heir and a parent is “is a.” That claim is just a really old but
-bad habit.
-One of the “godfathers” of object-oriented programming is the discipline known as “semantic networks,” and connections between nodes of those
-
-networks were actually meant to indicate “is a” relationships.
-(In computer science, as in many things, if something does not make sense, look for historical
-reasons.
-)
-So, don’t worry about what is a what, and think in terms of subcontracting
-instead.
-
-4.5 What PAIR Should Do As Subcontractor to ANY
 So, we have written PAJR as an heir to the predefined class ANY.
-Recall that
-we did not have much choice in the matter:
- every programmer-written class in
-Eiffel inherits directly or indirectly from ANY.
-So far, being an heir to ANY has been nothing but advantageous.
-Since
-ANY defines out in its contract, all other classes are obligated to support it, so
-we can write our PAIR’s out feature in terms of [TEM1 and ITEM2’s out features.
+Recall that we did not have much choice in the matter:
+*every* programmer-written class in Eiffel inherits directly or indirectly from `ANY`.
+
+So far, being an heir to `ANY` has been nothing but advantageous.
+Since `ANY` defines out in its contract, all other classes are obligated to support it,
+so we can write our PAIR’s out feature in terms of *ITEM1* and *ITEM2’s* out features.
 We don’t know what results they'll provide, but we know they exist.
+
 It has also eased our implementation:
- Because ANY implements a print
-feature that prints out the result of out, we did not have to do anything to
-implement print in PAIR or LETTER.
-With a good implementation of owt, no
-class needs to redefine print, it can just inherit its implementation from ANY.
+Because `ANY` implements a *print*  feature that prints out the result of out,
+we did not have to do anything to implement print in PAIR or LETTER.
+With a good implementation of *out*,
+no class needs to redefine print,
+it can just inherit its implementation from *ANY*.
+
 Thus, we took advantage of one inherited feature without redefining it,
-
 and redefined another one.
-We didn’t have to redefine out:
- ANY’s implementation will result in something that represents the entities in the pair, but it may
-not be particularly legible, will probably not be visually attractive, and is certain not to look the way we expect a pair to look
-(“(x,y)”).
+We didn’t have to redefine *out*:
+*ANY’s* implementation will result in something that represents the entities in the pair,
+but it may not be particularly legible, will probably not be visually attractive,
+and is certain not to look the way we expect a pair to look(**“(x,y)”**).
+
 But print and out were not the only inherited features that we used:
- We
-also used the entity Void and the feature is_equal.
-What other features are in
-ANY, and how do we know what they do?
-We may want to redefine some of
-them, just like we redefined out!
+We also used the entity *Void* and the feature *is_equal*.
+What other features are in *ANY*, and how do we know what they do?
+We may want to redefine some of them, just like we redefined out!
+
 The answer lies in The Eiffel Library Standard [2].
-Appendix B of this
-book reproduces the standard interface to ANY for easy reference.
-A detailed
-narrative of how some of these features interact with each other appears in
-Section 13.3 of Reusable Software [6].
+Appendix B of this book reproduces the standard interface to ANY for easy reference.
+A detailed narrative of how some of these features interact with each other appears in Section 13.3 of Reusable Software [6].
 
-SUBCLASSES
-
-AND
-
-SUBCONTRACTS
-
-Note that some of ANY’s features are marked with the keyword frozen.
+Note that some of *ANY’s* features are marked with the keyword **frozen**.
 Heirs are not permitted to redefine those features.
-Why?
-Well, observe that
-many of these are just features of convenience, like print.
+Why? Well, observe that many of these are just features of convenience, like print.
 For example,
-equal (a,b)
+
+`equal (a,b)`
 
 is just a shortcut for
+```python
 (a = Void and b = Void)
 or else
 ((a /= Void and b /= Void )and then a.is_equal (b))
+```
 
 so it saves you the trouble of making sure that is_equal is not applied to a void
 entity, and defines two void entities as equal.
-Since this shortcut is the same
+Since this shortcut is the same 
 for all objects, there is never a reason to redefine equal
-(which is why it is
-
-frozen).
+(which is why it is frozen).
 If the way to compare two objects of a new class is different from the
 inherited way, is_equal is the feature to redefine.
 
-Another category of frozen features is that of features having names prefixed with “standard_”.
-They are provided and frozen so that any heir class
-can get to ANY’s original way of doing things.
-In this way, a class that normally
-uses a redefined is_equal can easily get to ANY’s version by using standard_
-is_equal.
-Finally, there are features that are frozen because Eiffel relies on a specific
+Another category of frozen features is that of features having names prefixed with *“standard_”*.
+They are provided and frozen so that any heir class can get to ANY’s original way of doing things.
+In this way, a class that normally uses a redefined *is_equal* can easily get to *ANY’s* version by using `standard_is_equal`.
 
-method of their operation.
-These include default, tagged_out and do_nothing.
-Of what remains, besides some system-level stuff, there are features that
+Finally, there are features that are frozen because Eiffel relies on a specific method of their operation.
+These include *default, tagged_out and do_nothing*.
 
-deal with object comparison and those that deal with object copying.
-The two
-categories are intimately related:
-® Shallow copying of an object results in an object that is shallowly equal to
-the original.
+Of what remains, besides some system-level stuff,
+there are features that deal with object comparison and those that deal with object copying.
+The two categories are intimately related:
 
-= Deep copying of an object results in an object that is deeply equal to the
-original.
-Let us study them using PAIR as the example, and see if any of them needs to
-be redefined in PAIR.
+* Shallow copying of an object results in an object that is shallowly equal to the original.
+* Deep copying of an object results in an object that is deeply equal to the original.
 
-4.5.1 Comparing Pairs
-Two object structures are considered equal if they track the same items in the
-same order.
-Let us see if we already have something like that in our inheritance
-from ANY.
+Let us study them using PAIR as the example, and see if any of them needs to be redefined in PAIR.
 
-55
+## 4.5.1 Comparing Pairs
 
-56
+Two object structures are considered equal if they track the same items in the same order.
+Let us see if we already have something like that in our inheritance from *ANY*.
 
-OBJECT
+*ANY* provides for two levels of comparisons: deep equality
+(indicated by a “deep_” prefix in entity name)
+and shallow equality (no prefix).
+Two objects have shallow equality if each corresponding entity within them has the same value.
+For example, PAIR objects a and b, are shallowly equal if and only if[^3]:
 
-STRUCTURES
+1. <a’s first> = <b’s first>, and
+2. <a’s second> = <b’s second>.
 
-ANY provides for two levels of comparisons:
- deep equality
-(indicated by a
-“deep_” prefix in entity name)
-and shallow equality
-(no prefix).
-Two objects
-have shallow equality if each corresponding entity within them has the same
-value.
-For example, PAIR objects a and b, are shallowly equal if and only if®:
-1.
-<a’s first> = <b’s first>, and
-2.
-<a’s second> = <b’s second>.
-
-Recall that since first and second are nonexpanded entities, the
-means
-“track the same object,” not “track an equal object.” Thus, a shallow copy of a
-pair is another pair that tracks the same items in the same order—which is
-just what we want!
+Recall that since first and second are nonexpanded entities, the *=* means “track *the same* object,”
+not “track an equal object.”
+Thus, a shallow copy of a pair is another pair that tracks the same items in the same order
+—which is just what we want!
 We do not need to redefine is_equal.
-Unlike shallow equality checking, deep equality does not stop at the level
-of the first object.
-Instead, each pair of corresponding entities is checked for
-deep equality.
-Thus, deep_equal (a,b) is true if and only if:
-o_
 
-1.
-deep_equal (<a’s first>,<b’s first>), and
-2.
-deep_equal (<a’s second>,<b’s second>).
+Unlike shallow equality checking, deep equality does not stop at the level of the first object.
+Instead, each pair of corresponding entities is checked for deep equality.
+Thus, deep_equal (a,b) is true if and only if:
+
+1. deep_equal (<a’s first>,<b’s first>), and
+2. deep_equal (<a’s second>,<b’s second>).
+
 We do not need to redefine that either.
 In fact, comparing all object structures for deep equality is done the same way.
-We will never have to redefine
-deep_equal.
-However, we will soon encounter structures where the shallow
-equality is too shallow and will need to be redefined.
+We will never have to redefine deep_equal.
+However, we will soon encounter structures where the shallow equality is too shallow and will need to be redefined.
 
-4.5.2 Copying Pairs
+### 4.5.2 Copying Pairs
+
 The section of ANY that lists duplication features requires some explanation.
+
 The feature that does actual work is copy.
-If anything needs to be redefined
-to support heir-specific copying, it is copy.
-The deep duplication routines,
-deep_copy and deep_clone, are frozen
-(and we would not want to mess with
-them anyway).
+If anything needs to be redefined to support heir-specific copying, it is copy.
+The deep duplication routines, deep_copy and deep_clone, are frozen
+(and we would not want to mess with them anyway).
 The rest of the features in this portion of ANY are just shortcuts that call on copy to do real work.
-The command
-a.copy (b)
+The command `a.copy (b)`
 
-copies all entities of object b into the corresponding entities of object a.
-If b has
-entities that refer to nonexpanded objects, then only the references are copied,
-3] avoid the notation “a.first” because it only makes sense when first is an exported
-feature.
-In this case, all of PAIR’s entities are exported, but we will have other object
-structures that keep some entities private.
-Equality checks apply to all entities, exported
-or private.
+Copies all entities of object b into the corresponding entities of object a.
+If b has entities that refer to nonexpanded objects, then only the references are copied,
 
-
+[3]: avoid the notation “a.first” because it only makes sense when first is an exported
+feature. In this case, all of PAIR’s entities are exported, but we will have other object
+structures that keep some entities private. Equality checks apply to all entities, exported or private.
