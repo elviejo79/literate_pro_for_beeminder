@@ -375,6 +375,7 @@ For example,
 `equal (a,b)`
 
 is just a shortcut for
+
 ```python
 (a = Void and b = Void)
 or else
@@ -448,9 +449,191 @@ The deep duplication routines, deep_copy and deep_clone, are frozen
 The rest of the features in this portion of ANY are just shortcuts that call on copy to do real work.
 The command `a.copy (b)`
 
-Copies all entities of object b into the corresponding entities of object a.
-If b has entities that refer to nonexpanded objects, then only the references are copied,
-
 [3]: avoid the notation “a.first” because it only makes sense when first is an exported
 feature. In this case, all of PAIR’s entities are exported, but we will have other object
 structures that keep some entities private. Equality checks apply to all entities, exported or private.
+
+```python
+frozen clone (other: ANY): like other is
+  --Void if other is void; otherwise new object equal to other.
+do
+  if other /= Void then
+    Result := <bit-by-bit copy of other’s memory>;
+    Result.copy (other);
+  end; --else leave Result void.
+ensure
+  equal: equal (Result,other);
+end -- clone
+```
+Listing 4.4 The frozen implementation of clone, inherited from class ANY. (The construct “like other” is explained in Section 4.6.)
+
+Copies all entities of object b into the corresponding entities of object a.
+If b has entities that refer to nonexpanded objects, then only the references are copied, not the objects.
+After such copying, the corresponding nonexpanded entities in *a* will refer to the same objects as do the entities in *b*.
+
+As was the case with is_equal, ANY’s version of copy does just what we need for PAIR:
+
+1. <a’s first> := <b’s first>;
+2. <a’s second> := <b’s second>.
+
+After these assignments, **a’s first** and **second** entities track the same objects as **b’s first** and **second**, respectively, which is exactly what we wanted.
+
+Listing 4.4 shows the typical implementation of feature **clone**.
+It appears that clone is doing the copying twice, doesn’t it?
+Indeed it does.
+It has to, because copy is not a creation routine, so it needs to be requested of an object that is already valid.
+Routine **clone** has no concept of how to make **Result** refer to a valid object, because all it knows about the result is that it is a member of some heir of ANY-in other words, of any class whatsoever.
+Thus, **clone** has no way of knowing what creation routine to use to initialize Result.
+
+However, it knows that other is a valid object, so it plagiarizes other’s current state.
+In this way, **Result** refers to a valid object, even though it is just a duplicate of other.
+Why does clone call copy then, which does the same thing?
+Because you may want to redefine copy, so that it does something more suitable for your class.
+
+All right then, why doesn’t the default version of **copy** just do nothing, 
+since clone has already done the shallow copy?
+Because then the default implementation of copy would not be usable outside of clone.
+
+The default **copy** implementation and its interaction with **clone** are suitable for PAIR, 
+but in more complex object structures we will need to redefine **copy**,
+and in doing so we will have to take into account the exact manner in which clone uses it.
+
+## 4.6 Specifying Types with the like Keyword
+
+You may have noticed that in most cases,
+`ANY` actively avoids naming the types for its features and their parameters.
+Instead, it uses type specifications “like <entity or parameter>.” For example, the interface to copy is:
+
+```python
+copy (other: **like** Current)
+```
+
+This means that the type of other is the same as the type representing the class of the current object.
+When a `PAIR` objec responds to **copy**, other will be of type `PAIR`
+(meaning that it will accept an object of class PAIR or one of its heirs);
+when copy is performed by a `LETTER`, **other** will be of type `LETTER` 
+(so it will accept an object of class LETTER or one of its heirs), and so on.
+
+The need for such declarations should be apparent:
+It is fair to expect a `LETTER` object to copy another `LETTER` object onto itself,
+but telling it to copy a PAIR onto itself is unreasonable.
+
+## 4.7 Types, Classes, and Assignment
+
+We have seen three kinds of entities:
+
+1. Features 
+visible to the whole class, and perhaps requestable by other classes;
+2. Locals 
+visible only within a feature; and
+3. Parameters 
+visible only within a feature.
+
+All three come with a type declaration.
+When we declare an entity *e* to be of *type T (“e: T”)*,
+we tell the compiler that any object attached to *e* is capable of responding to the features provided by class *T*.
+To enforce this promise, the compiler will only allow assignments of compatible objects to this entity.
+Only objects from class *T* or from classes that are heirs to *T* are guaranteed to respond to requests for all features provided by *T*.
+Therefore, only such objects are allowed to be assigned to *e*.
+
+Delving into this example a little, suppose that class *B* is an heir of class *A*,
+and the following code is encountered:
+
+```python
+local
+  a: A;
+  b: B;
+do
+ create a.make; --Legal
+--a may track a new object of class A.
+
+create b.make; ---Legal
+--b may track a new object of class B.
+
+a := b; --Legal
+--a tracks a B object, which can do anything an A object can.
+
+b := a; --Illegal
+-~-b’s object may be asked to do things that an A object cannot do.
+
+create {B} a.make; --Legal
+--a may track a new B object, since it can do anything an A can.
+
+create {A} b.make; --Illegal
+--b’s object may be asked to do things that an A object cannot do.
+end
+```
+
+Passing an object into a parameter has the same effect
+(and hence the same restrictions)
+as making an entity track a newly made object or assigning one entity’s object to another.
+
+# Summary
+Inheritance is used in object-oriented programming to derive one class from another.
+The heir class inherits the contract from its ancestor together with the implementations of its features.
+
+An object of the heir class must be able to act as an object of the ancestor class.
+This means that it must accept the same requests with the same or easier preconditions,
+and perform them with the same or stricter postconditions.
+
+Since class ANY is an automatic heir to all classes in Eiffel, all classes are subcontractors for ANY.
+It is generally desirable to review ANY while writing a new class,
+and redefine some of the inherited features in a way that better suits the class.
+
+# Exercises
+
+## 1.
+Implement and test ENHANCED_PAIR, including all applicable require else and ensure then parts.
+
+## 2.
+When using PAIR_TESTER to test ENHANCED_PAIR as a subcontractor to PAIR,
+we did not change the type of local entity pair,
+we just created an ENHANCED_PAIR object and attached it to pair.
+But when we tested ENHANCED_PAIR with ENHANCED_PAIR_TESTER, 
+we did change pair’s type to ENHANCED_PAIR.
+Was that necessary?
+Why or why not?
+
+## 3. 
+Much of the code in ENHANCED_PAIR_TESTER’s test routine is a repetition of PAIR_TESTER’s test.
+Can inheritance be used to alleviate this duplication?
+If so, sketch the resulting classes and discuss the trade-offs between using inheritance and just copying the class and modifying it.
+If not, explain why not.
+
+## 4.
+If PAIR does not redefine out,
+what does your Eiffel system produce if you print a pair object?
+(If you have access to several Eiffel systems, try it on all of them and compare the results.)
+
+## 5.
+Draw a single diagram representing the following object structures:
+a. Entity a tracks a PAIR tracking two distinct LETTER objects.
+b. Entity 6 tracks a shallow copy of a’s object (for example, one obtained by doing “b := clone (a)”).
+c. Entity c tracks a deep copy of a’s object (e.g., one obtained by doing “c := deep_clone(a)”).
+
+## 6.
+Determine if the following claims are true or false and justify your answers.
+
+a. “equal (a,b)” implies “deep_equal (a,b)”.
+b. “deep_equal(a,b)” implies “equal (a,b)”.
+
+## 7.
+Fill in the blank with a statement that demonstrates why the statement
+before it is illegal.
+
+```python
+local
+  s: ENHANCED_PAIR[LETTER,LETTER];
+do
+  create {PAIR[LETTER,LETTER]} s.make;
+end
+```
+
+## 8. 
+*Void* is defined in ANY as a feature of type NONE.
+The assignment “x := Void” is always legal,
+regardless of the type of x.
+What does this say about the relationship of NONE to all other classes in an Eiffel system?
+
+## 9.
+Modify PAIR_TESTER to test the comparison and duplication routines that PAIR inherits from ANY.
