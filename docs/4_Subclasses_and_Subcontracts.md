@@ -406,7 +406,7 @@ The two categories are intimately related:
 
 Let us study them using PAIR as the example, and see if any of them needs to be redefined in PAIR.
 
-## 4.5.1 Comparing Pairs
+### 4.5.1 Comparing Pairs
 
 Two object structures are considered equal if they track the same items in the same order.
 Let us see if we already have something like that in our inheritance from *ANY*.
@@ -582,11 +582,10 @@ and redefine some of the inherited features in a way that better suits the class
 
 # Exercises
 
-## 1.
-Implement and test ENHANCED_PAIR, including all applicable require else and ensure then parts.
+1. Implement and test ENHANCED_PAIR,
+including all applicable require else and ensure then parts.
 
-## 2.
-When using PAIR_TESTER to test ENHANCED_PAIR as a subcontractor to PAIR,
+2. When using PAIR_TESTER to test ENHANCED_PAIR as a subcontractor to PAIR,
 we did not change the type of local entity pair,
 we just created an ENHANCED_PAIR object and attached it to pair.
 But when we tested ENHANCED_PAIR with ENHANCED_PAIR_TESTER, 
@@ -594,33 +593,26 @@ we did change pair’s type to ENHANCED_PAIR.
 Was that necessary?
 Why or why not?
 
-## 3. 
-Much of the code in ENHANCED_PAIR_TESTER’s test routine is a repetition of PAIR_TESTER’s test.
+3.  Much of the code in ENHANCED_PAIR_TESTER’s test routine is a repetition of PAIR_TESTER’s test.
 Can inheritance be used to alleviate this duplication?
 If so, sketch the resulting classes and discuss the trade-offs between using inheritance and just copying the class and modifying it.
 If not, explain why not.
 
-## 4.
-If PAIR does not redefine out,
+4. If PAIR does not redefine out,
 what does your Eiffel system produce if you print a pair object?
 (If you have access to several Eiffel systems, try it on all of them and compare the results.)
 
-## 5.
-Draw a single diagram representing the following object structures:
-a. Entity a tracks a PAIR tracking two distinct LETTER objects.
-b. Entity 6 tracks a shallow copy of a’s object (for example, one obtained by doing “b := clone (a)”).
-c. Entity c tracks a deep copy of a’s object (e.g., one obtained by doing “c := deep_clone(a)”).
+5. Draw a single diagram representing the following object structures:
 
-## 6.
-Determine if the following claims are true or false and justify your answers.
+    * Entity a tracks a PAIR tracking two distinct LETTER objects.
+    * Entity 6 tracks a shallow copy of a’s object (for example, one obtained by doing “b := clone (a)”).
+    * Entity c tracks a deep copy of a’s object (e.g., one obtained by doing “c := deep_clone(a)”).
 
-a. “equal (a,b)” implies “deep_equal (a,b)”.
-b. “deep_equal(a,b)” implies “equal (a,b)”.
+6. Determine if the following claims are true or false and justify your answers.
+    * “equal (a,b)” implies “deep_equal (a,b)”.
+    * “deep_equal(a,b)” implies “equal (a,b)”.
 
-## 7.
-Fill in the blank with a statement that demonstrates why the statement
-before it is illegal.
-
+7. Fill in the blank with a statement that demonstrates why the statement before it is illegal.
 ```python
 local
   s: ENHANCED_PAIR[LETTER,LETTER];
@@ -629,11 +621,9 @@ do
 end
 ```
 
-## 8. 
-*Void* is defined in ANY as a feature of type NONE.
+8. *Void* is defined in ANY as a feature of type NONE.
 The assignment “x := Void” is always legal,
 regardless of the type of x.
 What does this say about the relationship of NONE to all other classes in an Eiffel system?
 
-## 9.
-Modify PAIR_TESTER to test the comparison and duplication routines that PAIR inherits from ANY.
+9. Modify PAIR_TESTER to test the comparison and duplication routines that PAIR inherits from ANY.
