@@ -7,3 +7,4 @@
     - [4 Subclasses and Subcontracts](4_Subclasses_and_Subcontracts.md)
 - Part II Linear Object Structures
     - [5 Arrays](5_Arrays.md)
+    - [6 Lists](6_Lists.md)
