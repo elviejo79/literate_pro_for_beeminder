@@ -1271,3 +1271,1085 @@ end
 
 [1]: This is a simplified form of loop. The complete form is presented in Section 12.2.1.
 
+```Eiffel
+insert_on_left
+(new_item:
+
+ITEM)
+
+is
+
+--Insert new_item to the left of the cursor.
+
+local
+index:
+INTEGER;
+
+do
+--Smudge the items between cursor and length
+--one step to the right.
+from
+
+index := length;
+until
+index < cursor
+
+loop
+items.
+put
+(items.item
+(index),
+index+1);
+index := index - 1;
+end;
+
+--Put new_item into its place.
+items.put
+(new_item,
+cursor);
+
+--Fulfill the postconditions.
+cursor := cursor + 1;
+
+length := length + 1;
+end;
+--insert_on_left
+delete is
+
+--Remove the item under the cursor from the list.
+local
+index:
+INTEGER;
+void_item:
+ITEM;
+
+do
+--Smudge the items between cursor+1 and length
+--one step to the left.
+from
+index := cursor + 1;
+until
+index > length
+loop
+items.
+put
+(items.item
+(index),
+index-1);
+index := index + 1;
+end;
+--Disconnect the rightmost item from its former position
+--(for future garbage collection).
+items.put
+(void_item,
+length);
+
+--Fulfill the postconditions.
+length := length - 1;
+--cursor is already where it belongs.
+end;
+--delete
+```
+Listing 6.8 Features insert_on_left and delete of class LIST_ARRAY.
+
+
+You may have programmed in a language where the loop has an automatic
+increment mechanism; Eiffel loop does not have one.
+If we want index to be incremented by 1 before the body of the loop is executed again,
+we put an explicit ““tem:=item+1” statement at the end of the loop body.
+
+Deleting the item under the cursor requires that the same steps be taken
+in reverse order, as shown in Figure 6.8. The Eiffel code for that operation is
+shown also in Listing 6.8.
+
+
+```plantuml
+@startuml
+object an_item01
+object an_item02
+object an_item03
+object an_item04
+
+map Current {
+    capacity => 5
+    cursor => 2
+    length => 4
+    items => (an arary)
+    1 *-> an_item01
+    2 *-> an_item02
+    3 *-> an_item03
+    4 *-> an_item04
+    5 =>
+}
+@enduml
+```
+a. The order of copying needed to remove the hole that would be left by deleting the item under the cursor.
+
+```plantuml
+@startuml
+object an_item01
+object an_item02
+object an_item03
+object an_item04
+
+map Current {
+    capacity => 5
+    cursor => 2
+    length => 4
+    items => (an arary)
+    1 *-> an_item01
+    2 *-> an_item03
+    3 *-> an_item04
+    4 *-> an_item04
+    5 =>
+}
+@enduml
+```
+b. The item that was under the cursor has been removed from the list and cast adrift
+(if there are no entities tracking it, it will be picked up by the garbage collector).
+Due to the nature of the compaction, the value of cursor
+is such that the cursor is over the item to the right of the one that got deleted,
+which is what the postcondition requires.
+
+
+map Current {
+    capacity => 5
+    cursor => 2
+    length => 4
+    items => (an arary)
+    1 *-> an_item01
+    2 *-> an_item03
+    3 *-> an_item04
+    4 =>
+    5 =>
+}
+@enduml
+```
+c. The tracking information in the last position has been wiped out. The remaining postcondition has been taken care of.
+
+Figure 6.8 Responding to request “delete”. (The object’s routines are not shown to save page space.)
+
+To sever the connection from the last position of the array to the rightmost item,
+delete puts void_item into that position.
+The local feature void_item is an entity of type ITEM that is left at its initial value (void).
+We cannot just use “Void” in its place, because of a deep-rooted rule in the Eiffel language;
+let us just leave it at that.[^2]
+
+Finally, consider wipe_out. There are three things to do there:
+
+1. Reset the length to zero.
+2. Reset the cursor to off-left.
+3. Set adrift the items that the array had been tracking
+(some of them may get garbage-collected at this time).
+
+Since the standard ARRAY class does not provide a wipe_out feature,
+we would have to write a loop to do the last step.
+It is easier to just recreate the array!
+But if we do that, we end up with a routine that is just like make_capacity,
+except it does not change capacity.
+So the easiest thing to do is to let `make_capacity` do the work:
+
+```Eiffel
+wipe_out is
+--Make this list empty and off-left.
+do
+make_capacity
+(capacity);
+--Start from scratch,
+same capacity.
+end;--wipe_out
+
+[2]: Some Eiffel systems actually do allow Void to be used here, but the “void entity of type ITEM” solution always works.
+
+### 6.3.4 Is_equal
+Two lists are equal if they track the same items in the same order.
+At first glance, it may seem that all we need to do is ask the arrays inside them if they are equal.
+If we do, however, we may not get the right answer, since we do not want to compare all positions in those arrays.
+We only care about comparing items that are within the lists: positions *1 through...length?*
+But the lists could have different lengths!
+Well, if they do, they are not equal.
+We can check this condition before we even bother comparing respective items.
+Listing 6.9 shows the implementation.
+
+### 6.3.5 Copying and Cloning
+We saw in Section 4.5.2 how clone first makes its Result a bit-by-bit copy of the original object,
+and then requests *“Result.copy(<original>)”* (Listing 4.4).
+That bit-by-bit copy has a major (and unpleasant) influence on how we redefine copy.
+
+```Eiffel
+is_equal
+(other:
+like Current):
+BOOLEAN is
+--Do this list and other keep track
+-~of the same items in the same order?
+
+local
+index:
+INTEGER;
+
+do
+if length /= other.length then
+--Can’t be equal,
+so no sense going through the loop.
+
+Result := false;
+else
+
+from
+Result :=true;
+--Equal until proven unequal.
+index := 1;
+
+until
+Result = false --Exit as soon as inequality is detected
+or index > length --or when the list ends.
+loop
+Result := items.item
+(index) = other.items.item
+(index);
+
+index := index + 1;
+end;
+end;
+
+end;
+--is_equal
+```
+Listing 6.9 Feature is_equal of class LIST_ARRAY.
+
+```Eiffel
+copy
+(other:
+like Current) is
+--Copy other onto Current.
+local
+index:
+INTEGER;
+void_item:
+
+ITEM;
+
+do
+--Start from scratch.
+make_capacity
+(other.capacity);
+length := other.length;
+cursor := other.cursor;
+--Copy all the item references.
+from
+index := 1;
+until
+
+index > length
+loop
+items.
+put
+(other.items.item
+(index),
+index);
+index := index + 1;
+end;
+
+end;
+--copy
+```
+Listing 6.10 Feature copy for class LIST_ARRAY.
+
+If it was not for clone, 
+copying other onto Current would mean resizing items if necessary to other.length,
+copying the item references from other,
+and wiping out the item references in positions between other.length and Current’s old length.
+
+But if copy has been called from clone,
+then Current’s items is a reference to the same array as other.items!
+Whatever we do to items will just be done to other.items,
+no real copying happens.
+This situation, when several entities unexpectedly refer to the same object, is called aliasing
+(more on that in Section 15.5).
+
+So to account for the possibility that copy is executing by request from clone,
+we have to disconnect items from the aliased array,
+and create a new one,
+using *“create items.”* The resulting routine is given in Listing 6.10.
+
+### 6.3.6 String Representation
+Just as we could not use items.is_equal,
+we could not use items.out even if class ARRAY provided a good out feature
+(which it does not).
+It is up to us to write a feature that results in a string of the form specified in out’s description.
+One such implementation is shown in Listing 6.11.
+
+```Eiffel
+out:
+STRING is
+--Returns "< <1st item>.out...<last item>.out >".
+local
+index:
+INTEGER;
+do
+Result = clone("< ");
+--Left delimiter.
+from
+index := 1;
+
+until
+index > length
+loop
+Result.append_string
+(items.item(index).out);
+--Item’s representation.
+Result.append_string(" ");
+---Space between item representations.
+index := index + 1;
+end;
+
+Result.append_string
+(">");
+--Right delimiter.
+end;
+--out
+```
+Listing 6.11 Feature out of class LIST_ARRAY.
+
+## 6.4 Testing List Implementations
+
+Listing 6.12 presents a tester object for testing this list implementation.
+The parts that are implementation dependent are marked with “--imp.”
+Note that there are only three such places in the program!
+
+```Eiffel
+class LIST_TESTER
+
+creation test
+feature {NONE}
+full_at_4:
+BOOLEAN is false;
+--imp:
+set to true if list fills up at 4
+--The following lines control which implementation is being tested.
+listl:
+LIST_ARRAY|LETTER];
+--imp:
+use make_capacity in test
+--list1:
+LIST_DOUBLY_LINKED[(LETTER)];
+--imp:
+use make in test
+--list1:
+LIST_SINGLY_LINKED[(LETTER];
+--imp:
+use make in test
+list2:
+like list 1;
+write_cursor
+(the_list:
+like list1) is
+--Displays information about the cursor.
+do
+if the_list.is_off_left then
+print
+("off-left");
+
+elseif the_list.is_off_right then
+print
+("off-right");
+
+else
+print("at
+
+the
+
+");
+
+print
+(the_list.item);
+end;
+end;
+--write_cursor
+
+display
+(the_list:
+like list1;
+name:
+STRING) is
+--Displays informations about the list.
+do
+print("The list ");
+print(@ame);
+print(" is...%3N");
+print
+(the_list);
+print("$N...and its cursor is ");
+write_cursor
+(the_list);
+print
+(".3N");
+end;
+--display
+step_right
+(through_list:
+like list
+1;
+list_name:
+STRING) is
+--Steps through the list from off-left through off-right.
+local
+count:
+INTEGER;
+
+do
+print("Moving
+print("
+
+and
+
+off-left
+
+stepping
+
+in ");
+print
+(list_name);
+through
+
+the whole
+
+list...%N");
+
+print(" the length is ");
+print
+(through_list.length);
+through_list.move_off_left;
+print(" step 0,
+cursor is ");
+write_cursor
+(through_list);
+from
+count := 1;
+
+until
+count > through_list.length + 1
+loop
+through_list.move_right;
+print(" step ");
+print
+(count);
+print(",
+cursor
+print
+("SN");
+
+is
+
+");
+write_cursor(through_list);
+
+count := count + 1;
+end;
+print
+("SN");
+
+end;
+--step_right
+step_left
+(through_list:
+like list1;
+list_name:
+STRING) is
+--Steps through the list from off-right through off-left.
+local
+count:
+INTEGER;
+
+LISTS
+do
+print("Moving
+print("
+print("
+
+and
+the
+
+off-right
+
+in
+
+");
+print
+(list_name);
+
+stepping back through the whole list...%N");
+length is ");
+print
+(through_list.length);
+
+through_list.move_off_right;
+print("SN
+
+step
+
+0,
+
+cursor
+
+is
+
+");
+
+write_cursor
+(through_list);
+from
+count := 1;
+
+until
+count > through_list.length + 1
+loop
+through_list.move_left;
+print("SN
+
+step
+
+");
+print
+(count);
+
+print(",
+cursor is
+count := count + 1;
+end;
+
+");
+write_cursor
+(through_list);
+
+print
+("SNSN" );
+end;
+--step_left
+feature
+
+test is
+--Test the list class.
+local
+item:
+LETTER;
+
+do
+print("Creating list list1...%N");
+'Jist1.make_capacity
+(4);
+--imp:
+for LIST_ARRAY
+--!!list1.make;
+--imp:
+for LIST_DOUBLY_LINKED
+--and LIST_SINGLY_LINKED
+print("...done.%N%N");
+check
+list1_not_void:
+list1 /= Void;
+list1_not_full:
+not list1.is_full
+end;
+display
+(list1,
+"list1");
+print("%NMoving
+
+to off-left
+
+in list1...%N");
+
+list1.move_off_left;
+print("...done.%N");
+Nitem.make(’A’‘);
+
+print("SNAdding an ‘A’ to list1...%N.");
+list1.insert_on_right
+(item);
+
+print("...done.
+NN");
+display
+(list1,
+"list1");
+check
+list1_not_full:
+not list1.is_full;
+list1_off_left:
+list1.is_off_left
+end;
+'item.make('B’ );
+--Lets go of old item and creates a new one.
+print("SNAdding
+
+a
+
+‘B’
+
+to
+
+list1
+
+at
+
+the
+
+right
+
+end...%N");
+
+to
+
+Tilsti
+
+at
+
+the
+
+left
+
+end.
+..3N");
+
+list1
+
+after
+
+list1.move_off_right;
+list1.insert_on_left
+(item);
+print("...done.
+NSN");
+
+display
+(list1,
+"list1");
+check
+not list1.is_full;
+not list1.is_off_left;
+list1.is_off_right
+end;
+'item.make('C’‘);
+print("SNAdding
+
+a
+
+’C”’
+
+list 1.move_off_left;
+listl.insert_on_right
+(item);
+print("...done.%N%N");
+display
+(list1,
+"list1");
+check
+not list1.is_full;
+list1.is_off_left;
+not list1l.is_off_right
+end;
+"item.make('D‘);
+print("SNAdding
+
+a
+
+'D’
+
+to
+
+the
+
+‘A’...%N");
+
+list1.move_off_left;
+list1.move_right;
+list1.move_right;
+listl.insert_on_right
+(item);
+print("...done.%N%N");
+display
+(list1,
+"list1");
+check
+list1.is_full = full_at_4,;
+not list1.is_off_left;
+not list1.is_off_right
+end;
+step_right
+(list1,
+"list1");
+
+step_left
+(list1,
+"list1");
+
+print
+("%SNMoving off-left twice in a row.
+5 oan B
+list1.move_off_left;
+list1.move_off_left;
+print("...done.%N&N");
+check
+not list 1.is_empty;
+
+list1.is_full = full_at_4
+end;
+print
+("Moving
+
+off-right
+
+twice
+
+in a row..
+
+.2N");
+
+list 1.move_off_right;
+list1.move_off_right;
+print("...done.
+3N$N");
+check
+not list1.is_empty;
+list1l.is_full = full_at_4,
+end;
+
+display
+(list1,
+"list1");
+print
+("SNMaking list2
+list2 := clone
+(list1);
+print("...done.%N");
+display
+(list2,
+"list2");
+print
+("SN");
+print("Letting
+
+a clone
+
+of listl..
+
+.2N");
+
+go of list2.%N");
+
+list2 := Void;
+print("%NDeleting
+
+the
+
+second
+
+item
+
+from
+
+list1...%N");
+
+list1.move_off_left;
+list1.move_right;
+list1.move_right;
+list1.delete;
+
+print("...done.
+NN");
+display
+(list1,
+"list1");
+check
+not list1.is_empty;
+not list1.is_off_left;
+not list1.is_off_right
+end;
+print("%NDeleting
+
+the first
+
+item
+
+list1.move_off_left;
+list1.move_right;
+list1.delete;
+print("...done.
+%N%N");
+display
+(list1,
+"list1");
+check
+not list1.is_empty;
+not list 1.is_off_left;
+not list 1.is_off_right
+end;
+
+print("%NDeleting the last item from list1...%N");
+list1.move_off_right;
+list1.move_left;
+list1.delete;
+
+print("...done.
+N&N");
+display
+(list1,
+"list1");
+check
+not list1.is_empty;
+
+not list1.is_off_left;
+list1l.is_off_right
+end;
+print("SNMaking
+
+list1
+
+empty...%N");
+
+list1.wipe_out;
+print("...done.
+NN");
+display
+(list1,
+"1ist1");
+print
+("SN");
+step_right
+(list1,
+"list1");
+
+step_left
+(list1,
+"list1");
+print("SNTest
+
+done.
+%N");
+
+end;
+--test
+end --class LIST TESTER
+
+```
+Listing 6.12 LIST_TESTER, a class to test list classes.
+
+
+### 6.4.1 Stronger Assertions with `strip()`
+
+When we were writing our implementations,
+we came to appreciate how preconditions keep the routine simple.
+When we write the tester object,
+good postconditions begin to pay off.
+
+Until now, we have avoided listing in the postconditions all things about the object that do not change,
+because it would have been distracting.
+Even now, it would be too tedious to enumerate all the unchanged features of the object
+and, remember, we not only created our own features, we inherited many, too!
+
+To make this task possible, Eiffel provides a “strip expression.”
+The experssion
+
+```Eiffel
+strip(a,b,...)
+```
+
+results in an array whose elements are all the entities of the current object except *a,b,..*
+
+The strip expression allows us to write much stronger postconditions.
+For example, the postcondition for move_right can now be written as
+
+```Eifffel
+ensure
+    not_off_left: not is_off_left; 
+    -- The cursor is one step to the right of where it was.
+    strip(cursor).is_equal(old deep_copy(strip(cursor)));
+```
+
+With one line, we specified that no entity except the cursor changed about this object.
+
+A limitation of strip() is that it only works on features that are entities.
+Thus, the new assertion above will check that length stayed the same only if length is implemented as an entity and not a function.
+As was mentioned in Section 3.1.2, 
+the “nothing else changes” postconditions are rarely used for practical reasons,
+and the presence of **strip()** does not change that.
+Consider LIST_ARRAY’s routines, for example:
+If items does not change, we would need to deep_copy the whole array every time!
+This would leave us no choice but to turn off postcondition checking to have reasonable performance-which brings us to the next topic.
+
+## 6.5 Performance of the Array Implementation
+
+The two important aspects of software performance are how much time it consumes and how much space
+(usually in memory) it requires.
+Neither aspect should be measured in absolute terms:
+We cannot say that a certain piece of code will run in x seconds,
+because absolute performance depends on plenty of other factors,
+starting with the speed of the computer.
+Instead, we care about how performance changes as the number of items in the object structure changes.
+If we have ten times more items in the list,
+will it take us the same amount of time to move off-right?
+twice as long? ten times as long? twenty? one hundred?
+The same questions can be asked about how much more space overhead will be required.
+
+In other words, if there are N items in an object structure,
+we want to know in what way the time it takes to do a specific operation is proportional to N.
+This is known as the time complexity of that operation.
+Similarly, the space complexity is an expression that indicates how the amount of additional space needed to run the operation is related to N.
+By evaluating performance of algorithms as a function of N, 
+we have whatwe need to compare competing implementations of routines,
+so that we can choose the best one for the job.
+
+Formal analysis of a routine usually uses **recurrence relations**,
+which yield a precise measurement,
+such as “3/2*N + 9N - 1”.
+This text does not use recurrence relations:
+They are considered overkill for our purposes,
+and there are better places to study them
+(such as in a course on algorithm analysis or on discrete mathematics).
+Recurrence relations are too precise for our purposes.
+Instead of going through the trouble of deriving the formula above,
+we say that the complexity is “O(N^2)” (pronounced “order N squared”).
+This is known as **“big O notation.”** To get from a precise measurement to an order-of measurement,
+we take the following steps:
+
+1. Discard everything except the fastest growing term.
+2. Discard the constant factor and dress up what’s left in *“O(...).”*
+
+In the preceding example,
+step 1 leaves us with “3/2*N^2” and step 2 turns it
+into “O(N^2).” But... aren't we throwing away valuable information?
+Well, no. First of all, we probably do not need it.
+Second, if we do need it, we know where to find it.
+
+The precise measurement is often unnecessary for comparing two implementations.
+Consider two implementations, one of which (call it A) is O(N),
+while the other (B) is O(N^2).
+Suppose that the actual measurement for A is 10N + 10,000,
+while for B it is 0.01*N^2.
+If we plot them out (Figure 6.9),
+we see that despite the penalizing factor and the bias of the second term,
+the O(N) A still overtakes the less efficient, O(N^2) B.
+The extra information merely tells us how large N has to be to make the implementation with the lower order of complexity more desirable.
+
+We do need the discarded information if the two implementations we are comparing have the same order of complexity.
+
+
+![Figure 6.9 Regardless of the discarded](./fig_6_9.png)
+Figure 6.9 Regardless of the discarded constants and slower growing terms,
+an O(N) implementation is always better than an O(N^2) implementation for large enough N.
+
+Practically, however, the recurrence relation does not give us a sufficiently precise result because there are
+too many factors beyond the boundaries of the algorithm that can influence the actual performance:
+locality of memory reference, performance of the memory management system and other disk interfaces, etc.
+The most practical way to choose among two algorithms of the same order of complexity is to test them both in action on the real input and measure their absolute performances.
+The choice may vary from system to system, and from input set to input set.
+What is best for one of your customers may not be the best for another.
+
+Object structure features tend to have one of the following complexities,
+in increasing order:
+O(1) (meaning that the complexity of the operation is not dependent on WN at all, so it is O(N^0))); O(log N); O(N); O(N log N); and O(N^2) (this list is by no means exhaustive).
+
+* O(1) is often called “constant complexity,”
+* O(log N) is “logarithmic complexity,” 
+* O(N) is “linear,” and 
+* O(N^2) is “quadratic.”
+
+Since we tend to discuss time complexity much more frequently than space complexity,
+the reference to time is often omitted:
+If we talk about a feature’s complexity without specifically naming space complexity,
+then *time* complexity is the subject of discussion.
+
+### 6.5.1 Complexity of Features of LIST_ARRAY
+
+Most features of class LIST_ARRAY do not depend on the length of the list,
+so they are O(1).
+For example, *move_left* and *move_right* just increment and decrement an integer,
+so they are O(1).
+So are *move_off_left* and *move_off_right*, since they just assign an integer.
+
+Some of the features, however, must step through the whole list to do their job.
+Since they visit every item exactly once, they are all O(N).
+Feature `out` is one of these.
+
+Routine `make` just needs to make a few assignments,
+and request `items.make`.
+On most systems, make in class ARRAY is O(count),
+so our `make` is O(capacity).
+So is copy, since it must start from scratch because of the aliasing that occurs when it is called from clone
+(see Section 6.3.5).
+
+While *is_equal* is similar in its loop to out,
+it does not have to go through the whole list.
+The best case scenario is when the lists are not of the same length-then the feature is O(1).
+The trouble with best case scenarios is that they clash with Murphy’s Law.
+If the lists are of equal length,
+we must look through them until we either find corresponding positions that hold different items or until we reach the end of the list.
+Thus, the worst case is when the two lists are indeed equal,
+in which case the feature is O(N).
+Not knowing anything about the nature of the problem,
+we can venture a guess that on the average,
+we may have to search through half the list before finding an unmatched pair of items.
+Thus, the average case complexity is also O(N).
+(There is no such thing as “O(N/2)”, since the constant 1/2 is discarded when we use the big O notation.)
+
+Similar situations arise with *insert_on_left, insert_on_right, and delete.*
+In these routines, the time-consuming part is moving to the left (during deletion)
+or to the right (during insertion) all the item references that are to the right of the target position.
+Thus, the worst case is when we insert into or delete from the leftmost position of the list:
+We have to move O(N) item references.
+The best case is when we are working with the rightmost position of the list:
+There is nothing to move, so the operation is O(1).
+On the average, we will be working somewhere in the middle of the list,
+which is still O(N)).
+
+The O(N) complexities of *out* and *is_equal* cannot be helped:
+The very nature of these operations demands that we deal with O(N) items.
+
+Not so with insertion and deletion.
+The only reason we are getting O(N) performance with those is that we chose to store our item references in consecutive positions of an array,
+with one end of the list nailed down to one end of the array.
+This implementation is just fine if we usually work on the cheap end of the list
+(the right end, in our case) and avoid the expensive (left) end.
+If we know that our object structure will be used in circumstances where most of the inserting and deleting happens on the left side of the array,
+we can easily derive an implementation in which the list is nailed down on the right instead of on the left,
+thus giving O(1) performances on the left and O(N) on the right.
+
+On the other hand,
+if we do many insertions or deletions in the middle portions of the array,
+choosing an end to nail down will do us no good.
+We need a representation with which we can do insertions and deletions in O(1) time.
+We will study it in the next chapter.
+
+# Summary
+
+A list is an object structure that keeps track of each object based on its position relative to its neighbors.
+Our list model is based on the notion of a “current position”
+(indicated by the cursor),
+and the list provides operations to move the cursor to the left or to the right.
+Items can be inserted as left or right neighbors of the object under the cursor,
+and the item under the cursor may be deleted from the list.
+These operations are embodied in the contract, which is kept in class LIST.
+
+LIST is a deferred class,
+because it defers the implementation of the routines in its contract to its heirs.
+One such heir is LIST_ARRAY, which uses an ARRAY to keep track of the objects.
+It provides good (O(1)) performance in movement routines,
+but average and worst case time complexity for insertion and deletion are poor (O(N)).
+
+# Exercises
+1. 
+  1. Implement deferred class LIST.
+  2. Implement and test class LIST_ARRAY.
+2. Use the strip() expression to strengthen the postconditions of the routines in each list implementation that you have written. Can LIST_TESTER be simplified now?
+If so, simplify it.
+3. You have a list implemented as LIST_ARRAY.
+  1. It is tracking 1,000,000 items, you insert an item at its left end, and it  takes x seconds. 
+     How long would you expect to wait if the list had 2,000,000 items?
+  2. It is tracking 1,000,000 items, you insert an item at its right end, and it  takes x seconds.
+     How long would you expect to wait if the list had 2,000,000 items?
+  3. It is tracking 1,000,000 items, you insert an item in the middle of it, and it takes x seconds.
+     How long would you expect to wait if the list had 2,000,000 items?
+4. Suggest a way to speed up delete in the array implementation. What features have to be modified? Are they adversely affected?
+5. What is the time complexity of LIST_ARRAY’s wipe_out? Can it be improved? If so, discuss the trade-offs involved. If not, explain why not.
