@@ -16,6 +16,7 @@ def "main view" [view_type:string, class_name: string, projectFile :string ] {
     let temp_file = ([$temp_dir $"($class_name).($view_type)"] | path join)
     ^ec -config $project_name $"-($view_type)" $class_name -file $temp_file
     cat $temp_file | expand -i --tabs 2
+    # Cleaning the temp directory.
     rm --recursive --force $temp_dir
 }
 
@@ -25,4 +26,29 @@ def "main for" [sourceFile: string, projectFile? :string ] {
     assert ( $project_name | path exists) "The project file shoud exist"
 
     ^ec -config $project_name -pretty $sourceFile | expand -i --tabs 2
+}
+
+# List the contents of a file at a certain revision
+# Usage:
+#   code-listing <file> [--revision <rev>]
+# Example:
+#   code-listing ./my_dir/my_file.e --revision 33cd
+#   code-listing ./my_dir/my_file.e
+def "main file" [
+    file:string, # file contents to display
+    --tag:string = "HEAD" # revision or tag to checkout for the file
+    ] {
+    
+    # Get the repository's root directory.
+    let repo_root = (git rev-parse --show-toplevel | str trim)
+    
+    # Expand the provided file path to an absolute path.
+    let abs_file = ($file | path expand)
+    
+    # Compute the file's path relative to the repository root.
+    # (Assumes that the file is inside the repo.)
+    let relative_path = ( $abs_file  | path relative-to $repo_root)
+    
+    # Use 'git show' to retrieve the file's contents at the given revision.
+    git -C $repo_root show ($tag + ":" + $relative_path) | expand --tabs 2 | cat
 }
