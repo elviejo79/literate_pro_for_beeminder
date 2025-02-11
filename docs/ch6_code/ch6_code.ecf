@@ -26,9 +26,12 @@
 				<warning name="obsolete_feature" value="all"/>
 			</option>
 			<class_option class="APPLICATION" warning="none" is_obsolete_iteration="true" manifest_array_type="mismatch_warning">
+				<warning name="obsolete_feature" value="all"/>
 			</class_option>
-			<cluster name="my_list" location="\home\agarciafdz\r\gh\elv79\literate_pro_for_beeminder\docs\ch6_code\my_list\">
+
+			<cluster name="my_list" location="\home\agarciafdz\r\gh\elv79\literate_pro_for_beeminder\docs\my_list\">
 				<option warning="none" is_obsolete_iteration="true" manifest_array_type="mismatch_warning">
+					<warning name="obsolete_feature" value="all"/>
 				</option>
 			</cluster>
 		</cluster>

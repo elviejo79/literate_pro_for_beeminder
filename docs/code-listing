@@ -1,5 +1,6 @@
 #!/usr/bin/env nu
 use std assert
+use std/dirs
 
 def main [] {
 
@@ -20,9 +21,10 @@ def "main view" [view_type:string, class_name: string, projectFile :string ] {
     rm --recursive --force $temp_dir
 }
 
-def "main for" [sourceFile: string, projectFile? :string ] {
+def "main for" [sourceFile: string] {
     assert ( $sourceFile | path exists) "The source file shoud exist"
-    let project_name = ( $projectFile | default ( $sourceFile | path parse --extension .e | upsert extension { 'ecf' } | path join ))
+    let project_name = $sourceFile | find_project_file
+    #let project_name = ( $projectFile | default ( $sourceFile | path parse --extension .e | upsert extension { 'ecf' } | path join ))
     assert ( $project_name | path exists) "The project file shoud exist"
 
     ^ec -config $project_name -pretty $sourceFile | expand -i --tabs 2
@@ -50,5 +52,27 @@ def "main file" [
     let relative_path = ( $abs_file  | path relative-to $repo_root)
     
     # Use 'git show' to retrieve the file's contents at the given revision.
-    git -C $repo_root show ($tag + ":" + $relative_path) | expand --tabs 2 | cat
+    #git -C $repo_root show ($tag + ":" + $relative_path) | expand --tabs 2 
+
+    let temp_dir = (mktemp -d XXX.eiffel)
+    git worktree add --detach $temp_dir $tag 
+    dirs add $temp_dir
+    let $project_name = $relative_path | find_project_file 
+    ^ec -config $project_name -pretty $relative_path | expand --initial --tabs 1 -
+    # Cleaning the temp directory.
+    dirs drop
+    rm --recursive --force $temp_dir
+}
+
+def find_project_file []: path -> path {
+    let class_file = $in
+    assert ($class_file | path exists) $"File doesn't exist, given: ($class_file)"
+    let current_dir = $class_file | path dirname
+    let $search_result = glob ([ $current_dir "*.ecf" ] | path join)
+    if ($search_result | is-empty) {
+        $current_dir | find_project_file
+    } else {
+        assert (1 == ($search_result | length)) $"There should only be one project file, given: ($search_result)"
+        $search_result.0
+    }
 }
