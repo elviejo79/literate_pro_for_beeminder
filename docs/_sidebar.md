@@ -8,3 +8,4 @@
 - Part II Linear Object Structures
     - [5 Arrays](5_Arrays.md)
     - [6 Lists](6_Lists.md)
+    - [7 Linked Implementations of Lists](7_Linked_Implementations_of_Lists.md)
