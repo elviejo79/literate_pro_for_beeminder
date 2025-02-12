@@ -1377,7 +1377,7 @@ special aspects of single linking next. Then we will contemplate which fea-
 tures go into the deferred class LIST_LINKED and which belong in the 
 specific classes. 
 
-7.3 Implementing a Singly Linked List 
+## 7.3 Implementing a Singly Linked List 
 
 For convenience, an inside view of a singly linked list is given in Figure 7.9 (it 
 differs from Figure 7.6 only in directionality of the arrows between nodes). 
@@ -1387,4 +1387,937 @@ linked implementation. Consider, for example, insert_on_right. Since there
 is never a reason to look left of the cursor, there is no need to find the left - 
 neighbor of the node under the cursor. Since the left neighbors are not tracked, 
 there is no need to ever call set_left. The steps taken by insert_on_right 
-in a singly linked list are shown in Figure 7.10, and the code for it is in Listing 7.9. 
+in a singly linked list are shown in Figure 7.10, and the code for it is in Listing 7.9.
+
+
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ make()
+ item
+ out
+ copy
+ legth
+ move_left()
+ move_off_left()
+ is_off_left
+ insert_on_left()
+ delete()
+ move_right()
+ move_off_right()
+ is_off_right
+ insert_on_right()
+ wipe_out()
+ is_empty
+ is_full
+ is_equal
+ cursor_matches
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+Object node03
+Object nodeRight
+
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> node03
+node03 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node02
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+Object Item_3
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+node03 -down-> Item_3
+@enduml
+```
+Figure 7.9 The inside view of a LIST_SINGLY_LINKED object, take 1. 
+
+```plantuml
+@startuml
+
+package current <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+Object nodeRight
+
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node02
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+Object Item_3
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+
+@enduml
+```
+a. The list with which we started. 
+
+Figure 7.10 A singly linked list responds to request “insert_on_right (new_item)”. (The object’s routines are not shown in order to save page space. ) 
+
+```plantuml
+@startuml
+
+package current <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+Object nodeRight
+
+Object node03
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node01
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+Object Item_3
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+node03 -down-> Item_3
+
+@enduml
+```
+b. New_node has been made and is tracking new_item. 
+
+```plantuml
+@startuml
+
+package current <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+Object nodeRight
+
+Object node03
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node01
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+Object Item_3
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+node03 -down-> Item_3
+node03 -right-> node02
+
+@enduml
+```
+c. New_node has been told about its right neighbor. 
+
+Figure 7.10 (continued ) 
+
+
+```plantuml
+@startuml
+
+package current <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+Object nodeRight
+
+Object node03
+
+
+nodeLeft -right-> node01
+node01 -right-> node03
+node02 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node01
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+Object Item_3
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+node03 -down-> Item_3
+node03 -right-> node02
+
+@enduml
+```
+Figure 7.10 (continued ) 
+
+Observe that without tracking the last item of the list (or the off-left 
+marker in an empty list), the off-right marker has nothing to do: It tracks no 
+item and it never has a right neighbor to track. All it has to do is “be there,” so 
+that we know when we have reached the right end of the list. That being the 
+case, there is no need to create a whole new node: Comparing an entity with a 
+reference to Void is just as good as comparing it with a specially allocated but 
+otherwise unused node. This gives us a just slightly more efficient representa- 
+tion of a singly linked list as shown in Figure 7.11. 
+
+On the other hand, `delete` does require looking to the left of the node under 
+the cursor in order to set up a bypass from the left neighbor to the right neighbor, as shown in Figure 7.12. 
+
+```Eiffel
+insert_on_right (new_item: ITEM) is 
+
+——Insert new_item to the right of the cursor. 
+
+local 
+
+new_node: like off_left; 
+
+do 
+
+——Make a new node and make it track new_item. 
+'Inew_node.make; 
+new_node.set_item (new_item); 
+
+——Let new_node know its right neighbor. 
+new_node.set_right (under_cursor.right); 
+
+——Let new_node’s left neighbor know about it. 
+under_cursor.set_right (new_node); 
+
+end; ——insert_on_right 
+```
+Listing 7.9 Singly linked list’s implementation of insert_on_right. 
+
+
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ make()
+ item
+ out
+ copy
+ legth
+ move_left()
+ move_off_left()
+ is_off_left
+ insert_on_left()
+ delete()
+ move_right()
+ move_off_right()
+ is_off_right
+ insert_on_right()
+ wipe_out()
+ is_empty
+ is_full
+ is_equal
+ cursor_matches
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+Object node03
+Object nodeRight as "Void"
+
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> node03
+node03 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node02
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+Object Item_3
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+node03 -down-> Item_3
+@enduml
+```
+Figure 7.11 The inside view of a LIST_SINGLY_LINKED object, take 2. 
+
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+
+Object nodeRight as "Void"
+
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node02
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+
+@enduml
+```
+a. The list with which we started. 
+
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+
+Object nodeRight as "Void"
+
+
+
+nodeLeft -right-> node01
+node01 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node02
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+
+@enduml
+```
+b. Under_cursor’s left neighbor has been told to bypass under_cursor. 
+
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+
+Object nodeRight as "Void"
+
+
+
+nodeLeft -right-> node01
+node01 -right-> node02
+node02 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> node02
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+
+@enduml
+```
+a. The list with which we started. 
+
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+Object node02
+
+Object nodeRight as "Void"
+
+
+
+nodeLeft -right-> node01
+node01 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> nodeRight
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+Object Item_2
+
+node01 -down-> Item_1
+node02 -down-> Item_2
+
+@enduml
+```
+c. The entity under_cursor is made to track the node to under_cursor’s right. 
+```plantuml
+@startuml
+
+package a_list <<Rectangle>> {
+class a_list {
+ off_left
+ under_cursor
+ off_right
+}
+
+Object nodeLeft
+Object node01
+
+
+Object nodeRight as "Void"
+
+
+
+nodeLeft -right-> node01
+node01 -right-> nodeRight
+
+a_list::off_left --> nodeLeft
+a_list::under_cursor --> nodeRight
+a_list::off_right --> nodeRight
+}
+
+Object Item_1
+
+
+node01 -down-> Item_1
+
+
+@enduml
+```
+d. Just cleaning up the diagram. Since nothing in this list is tracking the  bypassed node, it is not part of the picture anymore. 
+
+Figure 7.12 A singly linked list’s response to request “delete”. (The object’s  routines are not shown in order to save page space.)
+
+Since a singly linked list cannot ask a node to identify its left neighbor, the 
+list has to do the job itself. We create a private feature for that task and call it 
+“left_of (<node>).” Its code is shown in Listing 7.10, together with make and 
+delete. 
+
+Using left_of, conversion of the routines described in Section 7.1 is straight
+forward. 
+
+```Eiffel
+class LIST_SINGLY_LINKED [ITEM] 
+inherit LIST_LINKED[ITEM] 
+create make 
+feature {NONE} 
+
+left_of (node: like off_left): like off_left is 
+
+——The node to the left of node in this list. 
+
+require 
+
+——node is somewhere in this list 
+
+do 
+
+from 
+
+Result := off_left 
+
+until 
+
+Result.right = node 
+
+loop 
+
+Result := Result.right; 
+
+end; 
+ensure 
+
+Result.right = node 
+
+end; ——left_of 
+
+feature 
+
+make is 
+
+——Initialize to get an empty, off-left list. 
+
+do 
+
+INODE_R{ITEM)!off_left.make; 
+——Leave off_right = Void. 
+Wwipe_out; 
+end; ——make 
+
+delete is 
+
+——Delete the item under the cursor. 
+
+do 
+
+——Make under_cursor’s left neighbor track under_cursor’s right neighbor 
+——instead of under_cursor. 
+left_of(under_cursor).set_right (under_cursor.right); 
+
+——Advance the cursor one step to the right. 
+under_cursor := under_cursor.right; 
+
+end; ——delete 
+
+end ——class LIST_SINGLY_LINKED 
+```
+
+Listing 7.10 A beginning of class LIST_SINGLY_LINKED. 
+
+## 7.4 Factoring Out Implementation Commonalities 
+
+The implementations of arrayed lists and linked lists had very little in common. The only thing they shared was the external view, so their common ancestor, LIST, deferred all implementations to them. 
+
+In contrast, LIST_SINGLY_LINKED and LIST_DOUBLY_LINKED are 
+quite similar in their implementations. This gives us an opportunity to place 
+some common code into LIST_LINKED (Figure 7.13). 
+
+Several considerations are relevant to deciding which routines to factor out of the more specific classes into their common ancestor. 
+
+
+```plantuml
+@startuml
+abstract LIST
+LIST <|-- LIST_ARRAY 
+
+LIST <|-- LIST_LINKED 
+
+LIST_LINKED <|-- LIST_SINGLY_LINKED 
+
+LIST_LINKED <|-- LIST_DOUBLY_LINKED 
+
+note bottom of LIST_LINKED : Features which do not depend on left-links are implemented here 
+note bottom of LIST_SINGLY_LINKED : Features which avoid using left-links are implemented here 
+note bottom of LIST_DOUBLY_LINKED : Features which use left-links are implemented here 
+```
+Figure 7.13 A plan for distributing feature implementations among the linked list classes. 
+
+1. *Avoiding code duplication.* All other things being equal, it is better to have 
+something implemented once rather than twice. If there is a bug in the code 
+(not that this ever happens to *you*, but hypothetically speaking), it is more 
+likely to be caught during testing if it is used in twice as many situations. 
+If you fix it in one place, two classes are fixed at once. 
+
+2. *Does the common ancestor have everything it needs to implement a routine?*
+Since implementations of the specific classes do differ, putting a feature into 
+the common ancestor may require it to use features that are implemented 
+in the more specific classes. This may take some additional planning. 
+
+3. *Is there an unacceptable loss of performance?* If an implementation of a feature in the ancestor would be significantly slower, then it should be done in 
+the heirs instead, the previous two considerations notwithstanding. 
+
+### 7.4.1 Simple Example: move_left and move_right 
+
+Let us look at some of the features of LIST_LINKED and decide the level at 
+which to implement them. Move_left and move_right are excellent examples of 
+how to apply the three considerations. 
+
+All move_right does is advance the cursor one step to the right: 
+
+```Eiffel
+under_cursor := under_cursor.right;
+```
+
+That code is identical for both singly and doubly linked lists. Thus, it is a good 
+candidate for being factored out into LIST_LINKED. Before we make that decision, we need to determine what its pre- and postconditions need. The precondition is “not is_off_right” and the postcondition is “not is_off_left.”
+Does this  mean that we need to implement is_off_left and is_off_right in LIST_LINKED? 
+Not at all. They need to be defined, but they already are (in LIST). Their implementation, though, may be left to the specific classes. When move_right is 
+requested of a LIST_SINGLY_LINKED object, it will use its own implementation of is_off_left and is_off_right, at whichever level that was defined. That 
+does not mean that we must not define them at the LIST_LINKED level, but 
+we do not have to. Thus, move_right goes into LIST_LINKED. 
+
+The singly and doubly linked implementations of move_left are quite different. LIST_DOUBLY_LINKED’s version cannot possibly be used on a singly 
+linked list, because NODE_R objects do not provide the left feature. LIST_SINGLY_LINKED’s version must start off-left and seek out the node to the left 
+of under_cursor. Now, we could use that version on doubly linked lists too, but 
+that is a perfect example of why we have consideration 3: Searching for the left 
+neighbor from off-left is an O(N) operation, while asking a NODE_LR for it is 
+O(1)—how’s that for unacceptable loss of performance? No, move_left better 
+stay in the more specific classes. 
+
+### 7.4.2 A More Subtle Example: out
+
+Since out builds the list’s string representation left-to-right, it would seem a 
+good candidate for being factored out of the specific classes into LIST_LINKED. 
+Let us write it and see. Listing 7.11 is the result. 
+
+
+```Eiffel
+out: STRING is 
+
+=—"< Istlitem.out ... last_item.out $s". 
+
+local 
+
+node: like off _left; 
+
+do 
+
+Result := clone("< "); -—Left delimiter. 
+from 
+
+node := off_left.right; 
+
+until 
+
+node = off_right 
+
+loop 
+
+Result.append_string (node.item.out); -—Item’s representation. 
+Result.append_string(" "); -—Space between item representations. 
+node := node.right; 
+
+end; 
+Result.append_string (">"); -—Right delimiter. 
+
+end; ——out 
+```
+Listing 7.11 Feature out of class LIST_LINKED. 
+
+```Eiffel
+feature {LIST_LINKED} 
+
+off_left: NODE_R|ITEM] is 
+——The off-left marker. 
+
+deferred. 
+end; —-—off_left 
+
+off_right: like off_left is 
+
+——The off-right marker. 
+
+deferred 
+end; —-off_right 
+```
+Listing 7.12 Making off_left and off_right known in class LIST_LINKED. 
+
+If we rush off to compile this now, we will get a blunt reminder that off _left 
+and off_right are not defined at this level. Of course, we already knew that. So, 
+can we define it here for both of the heir classes? It would be easier not to do 
+that at this time. For instance, off_right will need to be a NODE_LR in LIST _ 
+DOUBLY_LINKED but a NODE_R in LIST_SINGLY_LINKED. So, let us just 
+define them as deferred features of the most general type of node we have: 
+NODE_R (as shown in Listing 7.12). 
+
+I will let you work out how to spread the rest of the features between the 
+two levels of the class hierarchy. When I did it, I ended up with a LIST_LINKED 
+class consisting of three deferred features and a fully implemented one in the 
+“feature {LIST_LINKED}” section, and 14 fully implemented features visible 
+by all classes. That left eight features to be added in LIST_SINGLY_LINKED 
+and LIST_DOUBLY_LINKED, and, of course, the three features that were 
+deferred in the ancestor had to be defined too. 
+
+## 7.5 Choosing an Implementation: Performance Analyses 
+
+It is time to step back and look at the “big picture.” Given three implementations (deferred classes do not count), when does it make sense to use each one? 
+
+### 7.5.1 Time Considerations 
+
+First, let us summarize the worst case and average time complexities of each 
+feature in each implementation in Table 7.1 (average and worst case time complexities do not always coincide, but they do in these classes). 
+
+Table 7.1 Average and worst case time complexities for implementations 
+of lists. N = length, M = other.length. 
+
+| FEATURE         | ARRAY         | SINGLY_LINKED | DOUBLY_LINKED |
+|-----------------|---------------|---------------|---------------|
+| make            | O(capacity)   | O(1)          | O(1)          |
+| move_left       | O(1)          | O(N)          | O(1)          |
+| move_right      | O(1)          | O(1)          | O(1)          |
+| move_off_left   | O(1)          | O(1)          | O(1)          |
+| move_off_right  | O(1)          | O(1)          | O(1)          |
+| is_off_left     | O(1)          | O(1)          | O(1)          |
+| is_off_right    | O(1)          | O(1)          | O(1)          |
+| is_empty        | O(1)          | O(1)          | O(1)          |
+| is_full         | O(1)          | O(1)          | O(1)          |
+| item            | O(1)          | O(1)          | O(1)          |
+| replace         | O(1)          | O(1)          | O(1)          |
+| insert_on_left  | O(N)          | O(N)          | O(1)          |
+| insert_on_right | O(N)          | O(1)          | O(1)          |
+| delete          | O(N)          | O(N)          | O(1)          |
+| wipe_out        | O(capacity)[^a]| O(1)[^b]     | O(1)[^b]      |
+| out             | O(N)          | O(N)          | O(N)          |
+| copy            | O(capacity)   | O(M)          | O(M)          |
+| is_equal        | O(N)          | O(N)          | O(N)           |
+| cursor_matches  | O(N)          | O(N)          | O(N)          |
+| length          | O(1)          |See Exercise 7.4|See Exercise 7.4
+
+[a]: See Exercise 6.5. 
+
+[b]: The garbage collector may have to do O(N) work to recycle the discarded nodes. 
+
+The doubly linked implementation appears to be the clear winner: In the 
+array and the singly linked implementations, each feature has either the same 
+or worse complexity. Why, then, don’t we simply use the doubly linked version 
+and not bother with the other two? 
+
+Well, for one thing, the user may not need the expensive (O(N)) routines. For 
+example, if user code never requests the move_left, insert_on_left, and delete 
+features, then the singly linked implementation is as fast as the doubly linked 
+one. As we will discuss in Section 7.5.2, the singly linked implementation 
+requires less space. 
+
+The other consideration is where within the list the cursor is when a feature is requested. Table 7.2 shows the best case complexities for the various 
+features, and the circumstances under which they happen. 
+
+Fine, but when are we lucky enough to have the user request features only 
+under the best circumstances? Very rarely. However, in later chapters we will 
+be using linear object structures where we only support insertions at one end 
+of a list and place a similar restriction on removals. When that happens, we 
+will revisit this analysis, rather than trying to figure it all out again. 
+
+Table 7.2 Best case time complexities for implementations of lists, and the situations in which they occur. N = length, M = other.length. 
+
+| FEATURE         | ARRAY         | SINGLY_LINKED | DOUBLY_LINKED |
+|-----------------|---------------|---------------|---------------|
+| make            | O(capacity)   | O(1)          | O(1)          |
+| move_left       | O(1)          | O(1) On first item          | O(1)          |
+| move_right      | O(1)          | O(1)          | O(1)          |
+| move_off_left   | O(1)          | O(1)          | O(1)          |
+| move_off_right  | O(1)          | O(1)          | O(1)          |
+| is_off_left     | O(1)          | O(1)          | O(1)          |
+| is_off_right    | O(1)          | O(1)          | O(1)          |
+| is_empty        | O(1)          | O(1)          | O(1)          |
+| is_full         | O(1)          | O(1)          | O(1)          |
+| item            | O(1)          | O(1)          | O(1)          |
+| replace         | O(1)          | O(1)          | O(1)          |
+| insert_on_left  | O(1) Off-right  | O(1) On first item          | O(1)          |
+| insert_on_right | O(1) On last item          | O(1)          | O(1)          |
+| delete          | O(1) On last item         | O(1) On first item          | O(1)          |
+| wipe_out        | O(capacity)| O(1)     | O(1)      |
+| out             | O(N)          | O(N)          | O(N)          |
+| copy            | O(capacity)   | O(M)          | O(M)          |
+| is_equal        | O(1) Lengths differ          | O(1) 1st differ          | O(1) 1st differ           |
+| cursor_matches  | O(1)          | O(1) Both off-left| O(1) Bath off-left|
+| length          | O(1)          |See Exercise 7.4|See Exercise 7.4
+
+### 7.5.2 Space Considerations 
+
+Now let us look at how much space overhead these implementations require. 
+Let us call the amount of space taken up by one reference to an object “R.” At 
+the time of this writing, R is typically 32 bits (4 bytes). 
+
+The array implementation will occupy R X capacity, plus a little more 
+space for other attributes in the object (e.g., length). It does not matter how 
+many items are in the list; enough room is reserved for capacity items. Thus, 
+the space complexity of the array implementation is O(capacity). 
+
+A singly linked representation uses two references per node: a reference to 
+the item and a reference to the node’s right neighbor. But since nodes are allocated only when needed, the number of nodes is approximately N (plus a small, 
+constant number of nodes for the end markers and the spare, if any). Thus, the 
+space utilization is about 2R x N, which is OW). 
+
+The doubly linked implementation is similar in its space consumption, 
+except that there is an additional reference in each node for tracking its left 
+neighbor. Thus, the space consumption is roughly 3R x N, also O(N). 
+
+With complexities so similar, we do have to pay attention to the constants. 
+All other considerations aside, paying attention only to space use, when does it 
+make sense to use which implementation? 
+
+Suppose we have an array-based list with capacity 1,000,000. If it tracks 10 
+items, we are using 1,000,000R bytes (or whatever memory units we use) for 
+the job. A singly linked representation would only use 20R bytes, and a doubly 
+linked—30R. On a system with 4-byte R, the array representation loses by 
+almost 4 megabytes. 
+
+On the other hand, suppose it is tracking 999,990 items. In the array 
+representation, we are still using the same 1,000,000R bytes, but a singly 
+linked representation uses 1,999,980R, and the doubly linked—2,999,970R! 
+On a machine with 4-byte references, the array representation beats the singly 
+linked representation by almost 4 megabytes, and the doubly linked list by 
+almost 8 megabytes! 
+
+The break-even points are easy to compute. For array vs. singly linked, we have: 
+
+2R X N = R X capacity 
+
+N = capacity / 2 
+
+For array vs. doubly linked, we get N = 3 capacity. When N is smaller than the 
+break-even point, the linked representation is more space efficient; above the 
+break-even point, the array representation wins. 
+
+An important thing to consider is whether it is important to use only 
+enough memory to track the current number of items. On a multi-purpose system, it is important not to “hog” memory that you are not using. However, if 
+the object structure resides in a fixed amount memory that nobody else wants 
+(for example, a buffer box), then we might as well allocate the whole thing for 
+the array, and thus be capable of tracking twice as many items as with the 
+singly linked representation, and three times as many as with the doubly 
+linked version. 
+
+### 7.5.3 Is Time or Space More Important? 
+
+That, of course, depends on the circumstances. That is why there are different 
+implementations to consider. There is always a trade-off. 
+
+If the system is restricted in memory space (for example, it could be an 
+oscilloscope or a cheap personal computer), then memory considerations prevail. If, on the other hand, the system is loaded with physical memory, then 
+space efficiency may be sacrificed to get more speed. 
+
+Why just “physical memory’; isn’t virtual memory just as good? Well, if you 
+think that space efficiency is not important on a virtual memory system (as 
+most general-purpose operating systems now are), think again. If your object 
+structure is spread over too many memory pages, the system will have to do 
+swapping with the hard disk to access parts of it. There is no easier way to slow 
+down the execution of your program than by having to wait for disk access to 
+complete: Disk access is thousands of times slower than memory access. 
+
+# Summary 
+
+Linked lists use interconnected nodes to keep track of objects. Insertion and 
+deletion entail manipulating node references, and are potentially O(1) in time 
+complexity. 
+
+Linked lists can be singly linked or doubly linked. In a doubly linked list, a 
+node has references to both of its neighbors; in a singly linked list, only to one 
+neighbor. Singly linked lists occupy less space, and their implementations of 
+some of the features are simpler. However, moving in the direction opposite of 
+the node reference chain is an O(N) operation, so all operations that require it 
+become O(N) or worse. Doubly linked lists have the best time complexity, but 
+require more space per node. 
+
+Classes SINGLY_LINKED_LIST and DOUBLY_LINKED_LIST have 
+enough feature implementations in common to warrant the creation of a 
+shared parent class, LINKED_LIST (which is an heir to LIST). 
+
+# Exercises 
+
+1. Consider the “spare tire” implementation of linked lists. 
+
+a. Draw an empty list. 
+
+b. Draw the result of inserting an item into the list you drew in part (a), 
+
+assuming that there is room for another node in the system. 
+
+c. Draw the result of inserting an item into the list you drew in part (b), 
+assuming that there is not enough room for another node in the system. 
+
+d. Draw the result of deleting an item from the list you drew in part (c). 
+
+2. Suppose we did want to have a class NODE_L. How would it fit in with the 
+other node classes discussed in this chapter? Suggest a class hierarchy for 
+these classes, stating which methods are implemented and which (if any) 
+are deferred in each class. (Note: A class may have more than one parent.) 
+3. Which features should be implemented in class LIST_LINKED, and which 
+should be deferred to LIST SINGLY _LINKED and LIST_DOUBLY_ 
+LINKED? 
+
+4. Sketch two different ways of implementing feature length in class LIST_LINKED (deferring it does not count). Discuss the trade-offs between the 
+two implementations. 
+
+5. a. Implement deferred class LIST_LINKED. 
+
+b. Implement class LIST_DOUBLY_LINKED. 
+
+c. Implement class LIST_SINGLY_LINKED. 
+
+d. Changing only the lines marked “——imp” in LIST_TESTER, test classes 
+
+LIST_DOUBLY_LINKED and LIST_SINGLY_LINKED. 
+
+6. Consider the typical implementation of ARRAY discussed in Chapter 5. 
+What are the time complexities of the operations item, put, and resize? 
+Explain your answers. 
