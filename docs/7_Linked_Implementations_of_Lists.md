@@ -2287,13 +2287,9 @@ shared parent class, LINKED_LIST (which is an heir to LIST).
 1. Consider the “spare tire” implementation of linked lists. 
 
 a. Draw an empty list. 
+b. Draw the result of inserting an item into the list you drew in part (a),  assuming that there is room for another node in the system. 
 
-b. Draw the result of inserting an item into the list you drew in part (a), 
-
-assuming that there is room for another node in the system. 
-
-c. Draw the result of inserting an item into the list you drew in part (b), 
-assuming that there is not enough room for another node in the system. 
+c. Draw the result of inserting an item into the list you drew in part (b), assuming that there is not enough room for another node in the system. 
 
 d. Draw the result of deleting an item from the list you drew in part (c). 
 
@@ -2301,12 +2297,13 @@ d. Draw the result of deleting an item from the list you drew in part (c).
 other node classes discussed in this chapter? Suggest a class hierarchy for 
 these classes, stating which methods are implemented and which (if any) 
 are deferred in each class. (Note: A class may have more than one parent.) 
+
 3. Which features should be implemented in class LIST_LINKED, and which 
 should be deferred to LIST SINGLY _LINKED and LIST_DOUBLY_ 
 LINKED? 
 
-4. Sketch two different ways of implementing feature length in class LIST_LINKED (deferring it does not count). Discuss the trade-offs between the 
-two implementations. 
+4. Sketch two different ways of implementing feature length in class LIST_LINKED (deferring it does not count).
+Discuss the trade-offs between the two implementations. 
 
 5. a. Implement deferred class LIST_LINKED. 
 
