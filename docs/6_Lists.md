@@ -84,13 +84,13 @@ map a_list {
     make() =>
     move_left() =>
     move_right() =>
-    cursor *-> an_item02
+    cursor *--> an_item02
 }
 
-a_list *-> an_item01
-a_list *-> an_item02
-a_list *-> an_item03
-a_list *-> an_item04
+a_list *--> an_item01
+a_list *--> an_item02
+a_list *--> an_item03
+a_list *--> an_item04
 
 @enduml
 ```
@@ -195,13 +195,13 @@ map a_list {
     move_off_right() =>
     is_off_left =>
     is_off_right =>
-    cursor *-> an_item02
+    cursor *--> an_item02
 }
 
-a_list *-> an_item01
-a_list *-> an_item02
-a_list *-> an_item03
-a_list *-> an_item04
+a_list *--> an_item01
+a_list *--> an_item02
+a_list *--> an_item03
+a_list *--> an_item04
 
 @enduml
 ```
@@ -310,7 +310,7 @@ or move to the new one?
 Let us make it stay with the same item.
 The skeleton of these features is shown in Listing 6.4.
 
-Feature delete deletes the item under the cursor from the list.
+Feature `delete` deletes the `item` under the `cursor` from the list.
 For this to work, the cursor can be neither off-left nor off-right.
 Also, it has to move a step either to the left or to the right,
 because it cannot stay with the deleted item; 
@@ -484,17 +484,16 @@ map a_list {
     insert_on_left() =>
     insert_on_right() =>
     cursor_matches =>
-    delete()=>
-    whipe_out()=>
-    length
-    cursor *-> an_item02
+    delete() =>
+    whipe_out() =>
+    length =>
+    cursor *--> an_item02
 }
 
-a_list *-> an_item01
-a_list *-> an_item02
-a_list *-> an_item03
-a_list *-> an_item04
-
+a_list *--> an_item01
+a_list *--> an_item02
+a_list *--> an_item03
+a_list *--> an_item04
 @enduml
 ```
 Figure 6.4 Complete outside view of a LIST object.
@@ -529,7 +528,7 @@ As subcontractors, objects in those classes will have to follow contracts that a
 The resulting class LIST is shown in Listing 6.6.
 While we were at it, we reorganized the routines under several **feature** sections.
 
-```Eiffel
+```Python
        $ cd $TESTDIR
        $ ./code-listing file ./ch6_code/my_list/my_list.e --tag 37d94
        Preparing worktree (detached HEAD 37d9470)
@@ -772,10 +771,10 @@ map a_list {
     cursor => 2
     length => 4
     items =>
-    1 *-> an_item01
-    2 *-> an_item02
-    3 *-> an_item03
-    4 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item02
+    3 *--> an_item03
+    4 *--> an_item04
     5 =>
 }
 
@@ -816,11 +815,6 @@ which is shown in Listing 6.7.
 
 ```plantuml
 @startuml
-object an_item01
-object an_item02
-object an_item03
-object an_item04
-
 map a_list {
     make() =>
     move_left() =>
@@ -858,161 +852,126 @@ map a_list {
 Figure 6.6 An empty LIST_ARRAY object of capacity 5.
 This one is off-left, as would be made by make according to its postcondition.
 
-```Eiffel
-class LIST_ARRAY [ITEM] inherit
-LIST ITEM]
-creation make,
-make_capacity
-feature {LIST_ARRAY} --Visible only to similar lists
-items:
-ARRAY
-(ITEM);
---The array tracking the items.
-cursor:
-INTEGER;
---Index within items of the item under the cursor.
-feature --Creation,
-initialization,
-resizing
-
-make is
---Initialize to get an empty,
-off-left list
---of default capacity.
-do
-make_capacity
-(100);
---Default capacity.
-end;
---make
-
-make_capacity
-(initial_capacity:
-INTEGER) is
---Initialize to get an empty,
-off-left list
---of capacity initial_capacity.
-
-require
-initial_capacity >= 0;
-
-do
-capacity := initial_capacity;
-
-"items.make
-(1,initial_capacity);
---First item is always at index 1.
-length := 0;
---Start out empty.
-cursor := 0;
---Start out off-left.
-end;
---make_capacity
-
-resize
-(new_capacity:
-INTEGER) is
---Resizes the list to new_capacity.
-Could be very expensive.
-require
-new_capacity > = 0;
-
-do
-capacity := new_capacity;
-
-items.resize
-(1,
-new_capacity);
---First item is always at index 1.
---May have to truncate this list to fit the new array.
-if cursor > capacity+1 then
-cursor := capacity + 1;
-end;
-
-if length > capacity then
-length := capacity;
-end;
-
-end;
---resize
-feature --Sizing
-capacity:
-INTEGER;
---Current capacity.
-length:
-INTEGER;
---The number of items currently in this list.
-is_empty:
-BOOLEAN is
---Is this list empty?
-do
-Result := length = 0;
-end;
---is_empty
-is_full:
-BOOLEAN is
--~Is there is no room in this list for one more item?
-do
-
-Result := length = capacity;
-end;
---is_full
-feature -- Moving through the list
-move_left is
---Move the cursor one step to the left.
-do
-cursor := cursor - 1;
-
-end;
---move_left
-move_right is
---Move the cursor one step to the right.
-do
-cursor := cursor + 1;
-
-end;
---move_right
-move_off_left is
---Move the cursor to the off-left position.
-do
-cursor := 0;
-
-end;
---move_off_left
-move_off_right is
---Move the cursor to the off-right position.
-do
-cursor := length + 1;
-end;
---move_off_right
-
-is_off_left:
-BOOLEAN is
---Is the cursor off-left?
-do
-Result := cursor = 0;
-end;
---is_off_left
-_ts_off_right:
-BOOLEAN is
---Is the cursor off-right?
-do
-Result := cursor = length+1;
-end;
---is_off_right
-invariant
-capacity_not_negative:
-
-0 <= capacity;
-
-length_in_range:
-length <= capacity;
-cursor_in_range:
-0 <= cursor and cursor <= length+1;
-good_array:
-items /= Void and then
-items.count = capacity and items.lower = 1;
-end -~class LIST _ARRAY
+```Python
+       $ cd $TESTDIR
+       $ ./code-listing for ./my_list/my_list_array.e ./ch6_code/ch6_code.ecf
+       note
+         description: "Summary description for {MY_LIST_ARRAY}."
+         author: ""
+         date: "$Date$"
+         revision: "$Revision$"
+       
+       class MY_LIST_ARRAY [ITEM]
+       
+       inherit
+         MY_LIST [ITEM]
+       create
+         make,
+         make_capacity
+       
+       feature {LIST_ARRAY}
+         --Visible only to similar lists
+         items: ARRAY [ITEM]; --The array tracking the items.
+       
+         cursor: INTEGER; --Index within items of the item under the cursor.
+       
+         make_capacity (initial_capacity: INTEGER)
+       
+           require
+             initial_capacity >= 0;
+       
+           do
+             capacity := initial_capacity;
+       
+             create items.make (1, initial_capacity);
+               --First item is always at index 1.
+             length := 0;
+               --Start out empty.
+             cursor := 0;
+             --Start out off-left.
+           end;
+       
+         resize (new_capacity: INTEGER)
+             --Resizes the list to new_capacity. Could be very expensive.
+           require
+             new_capacity >= 0;
+       
+           do
+             capacity := new_capacity;
+       
+             items.resize (1, new_capacity); --First item is always at index 1.
+               --May have to truncate this list to fit the new array.
+             if cursor > capacity + 1 then
+               cursor := capacity + 1;
+             end;
+       
+             if length > capacity then
+               length := capacity;
+             end;
+       
+           end;
+       
+       feature --Sizing
+         capacity: INTEGER; --Current capacity.
+         length: INTEGER; --The number of items currently in this list.
+         is_empty: BOOLEAN --Is this list empty?
+           do
+             Result := length = 0;
+           end;
+       
+         is_full: BOOLEAN -- Is there is no room in this list for one more item?
+           do
+             Result := length = capacity;
+           end;
+       
+       feature -- Moving through the list
+         move_left --Move the cursor one step to the left.
+           do
+             cursor := cursor - 1;
+       
+           end;
+       
+         move_right --Move the cursor one step to the right.
+           do
+             cursor := cursor + 1;
+       
+           end;
+       
+         move_off_left --Move the cursor to the off-left position.
+           do
+             cursor := 0;
+       
+           end;
+       
+         move_off_right --Move the cursor to the off-right position.
+           do
+             cursor := length + 1;
+           end;
+       
+         is_off_left: BOOLEAN --Is the cursor off-left?
+           do
+             Result := cursor = 0;
+           end;
+       
+         is_off_right: BOOLEAN --Is the cursor off-right?
+           do
+             Result := cursor = length + 1;
+           end;
+       
+       invariant
+         capacity_not_negative:
+       
+           0 <= capacity;
+       
+         length_in_range:
+           length <= capacity;
+         cursor_in_range:
+           0 <= cursor and cursor <= length + 1;
+         good_array:
+           items /= Void and then
+           items.count = capacity and items.lower = 1;
+       
+       end
 ```
 Listing 6.7 Initial sketch of class LIST_ARRAY:
 features dealing with initialization, sizing, and movement through lists.
@@ -1077,10 +1036,10 @@ map Current {
     cursor => 2
     length => 4
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item02
-    3 *-> an_item03
-    4 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item02
+    3 *--> an_item03
+    4 *--> an_item04
     5 =>
 }
 @enduml
@@ -1099,18 +1058,15 @@ map Current {
     cursor => 2
     length => 4
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item02
-    3 *-> an_item02
-    4 *-> an_item03
-    5 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item02
+    3 *--> an_item02
+    4 *--> an_item03
+    5 *--> an_item04
 }
 @enduml
 ```
 b. Room has been made for new_item to the left of cursor.
-
-Figure 6.7 Responding to request “insert_on_left(new_item)”.
-(The object’s routines are still there, they were omitted to save page space.)
 
 ```plantuml
 @startuml
@@ -1125,11 +1081,11 @@ map Current {
     cursor => 2
     length => 4
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item05
-    3 *-> an_item02
-    4 *-> an_item03
-    5 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item05
+    3 *--> an_item02
+    4 *--> an_item03
+    5 *--> an_item04
 }
 @enduml
 ```
@@ -1148,15 +1104,18 @@ map Current {
     cursor => 3
     length => 5
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item05
-    3 *-> an_item02
-    4 *-> an_item03
-    5 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item05
+    3 *--> an_item02
+    4 *--> an_item03
+    5 *--> an_item04
 }
 @enduml
 ```
 d. A promise is a promise
+
+Figure 6.7 Responding to request “insert_on_left(new_item)”.
+(The object’s routines are still there, they were omitted to save page space.)
 
 
 Are we done? Well, let’s check the postconditions:
@@ -1296,10 +1255,10 @@ map Current {
     cursor => 2
     length => 4
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item02
-    3 *-> an_item03
-    4 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item02
+    3 *--> an_item03
+    4 *--> an_item04
     5 =>
 }
 @enduml
@@ -1318,10 +1277,10 @@ map Current {
     cursor => 2
     length => 4
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item03
-    3 *-> an_item04
-    4 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item03
+    3 *--> an_item04
+    4 *--> an_item04
     5 =>
 }
 @enduml
@@ -1338,9 +1297,9 @@ map Current {
     cursor => 2
     length => 4
     items => (an arary)
-    1 *-> an_item01
-    2 *-> an_item03
-    3 *-> an_item04
+    1 *--> an_item01
+    2 *--> an_item03
+    3 *--> an_item04
     4 =>
     5 =>
 }

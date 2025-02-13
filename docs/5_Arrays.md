@@ -44,7 +44,7 @@ we use the “put (<what>,<where>)” feature, for example:
 x.put (0bj1,75);
 ```
 
-makes position 75 of array x track object ob11.
+makes position 75 of array x track object obj1.
 Feature *item (n)* returns the object tracked by position n.
 For example,
 
@@ -91,13 +91,13 @@ map an_array {
     item =>
     lower =>
     upper =>
-    -3 *-> an_item01
-    -2 *-> an_item02
-    -1 *-> an_item03
-    0 *-> an_item04
-    1 *-> an_item05
-    2 *-> an_item06
-    3 *-> an_item07
+    -3 *--> an_item01
+    -2 *--> an_item02
+    -1 *--> an_item03
+    0 *--> an_item04
+    1 *--> an_item05
+    2 *--> an_item06
+    3 *--> an_item07
 }
 
 @enduml
@@ -156,13 +156,13 @@ map an_array {
     start_address => 1000
     item_width => 4
     memory =>
-    -3 *-> an_item01
-    -2 *-> an_item02
-    -1 *-> an_item03
-    0 *-> an_item04
-    1 *-> an_item05
-    2 *-> an_item06
-    3 *-> an_item07
+    -3 *--> an_item01
+    -2 *--> an_item02
+    -1 *--> an_item03
+    0 *--> an_item04
+    1 *--> an_item05
+    2 *--> an_item06
+    3 *--> an_item07
 }
 
 @enduml
@@ -170,7 +170,7 @@ map an_array {
 Figure 5.2 A typical internal view of the ARRAY shown in Figure 5.1.
 
 This mechanism is very fast,
-and it works for position `x.lowe` as quickly as for `x.uppe` or any position between.
+and it works for position `x.lower` as quickly as for `x.upper` or any position between.
 Most array implementations use this technique.
 
 However, in order for it to work, all positions must be lined up in a continuous segment of memory.

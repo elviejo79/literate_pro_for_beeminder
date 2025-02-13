@@ -21,10 +21,10 @@ def "main view" [view_type:string, class_name: string, projectFile :string ] {
     rm --recursive --force $temp_dir
 }
 
-def "main for" [sourceFile: string] {
+def "main for" [sourceFile: string, $projectFile:path] {
     assert ( $sourceFile | path exists) "The source file shoud exist"
-    let project_name = $sourceFile | find_project_file
-    #let project_name = ( $projectFile | default ( $sourceFile | path parse --extension .e | upsert extension { 'ecf' } | path join ))
+    
+    let project_name = ( $projectFile | default ( $sourceFile | path parse --extension .e | upsert extension { 'ecf' } | path join ))
     assert ( $project_name | path exists) "The project file shoud exist"
 
     ^ec -config $project_name -pretty $sourceFile | expand -i --tabs 2
