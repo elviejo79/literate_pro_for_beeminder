@@ -23,15 +23,15 @@
     - [10 Application Calculators](10_Application_Calculators.md)
 
 - Part III Sorting and Searching I wont do them
-    - 11 Dictionaries and Associatons
-    - 12 Sorting
+    - [11 Dictionaries and Associatons](11_Dictionaries_and_Associations.md)
+    - [12 Sorting](12_Sorting.md)
     - 13 Faster Sorting
     - 14 Faster Dictionaries
 
 - Part IV Trees
-    - 15 Binary Search Trees
-    - 16 Heaps
-    - 17 B-Trees (balanced trees)
+    - [15 Binary Search Trees](15_Binary_Search_Trees.md)
+    - [16 Heaps](16_Heaps.md)
+    - [17 B-Trees](17_B_trees.md) -balanced trees-
     - 18 Application: Hacker's Dictionary
 
 - Appendix A Tester Classes
