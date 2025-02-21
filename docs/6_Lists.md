@@ -317,7 +317,7 @@ because it cannot stay with the deleted item;
 since the choice is, once again, arbitrary, we will move it a step to the right.
 This routine’s skeleton is also shown in Listing 6.4.
 
-```Eiffel
+```python
 is_full: BOOLEAN is
     --Is there no room in this list for one more item?
 do
@@ -433,7 +433,7 @@ clone calls it to do the copying.
 We add these skeletons to the class,
 as shown in Listing 6.5.
 
-```Eiffel
+```python
 out: STRING is
     --Returns "< <lstitem>.out...<last item>.out >".
 do
@@ -1151,7 +1151,7 @@ end
 
 [1]: This is a simplified form of loop. The complete form is presented in Section 12.2.1.
 
-```Eiffel
+```python
 insert_on_left
 (new_item:
 
