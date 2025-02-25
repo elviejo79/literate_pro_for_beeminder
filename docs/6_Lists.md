@@ -1151,7 +1151,7 @@ end
 
 [1]: This is a simplified form of loop. The complete form is presented in Section 12.2.1.
 
-```pythongit p
+```python
 insert_on_left
 (new_item:
 
@@ -1291,20 +1291,7 @@ Due to the nature of the compaction, the value of cursor
 is such that the cursor is over the item to the right of the one that got deleted,
 which is what the postcondition requires.
 
-
-map Current {
-    capacity => 5
-    cursor => 2
-    length => 4
-    items => (an arary)
-    1 *--> an_item01
-    2 *--> an_item03
-    3 *--> an_item04
-    4 =>
-    5 =>
-}
-@enduml
-```
+#### TODO
 c. The tracking information in the last position has been wiped out. The remaining postcondition has been taken care of.
 
 Figure 6.8 Responding to request “delete”. (The object’s routines are not shown to save page space.)
@@ -1338,7 +1325,7 @@ make_capacity
 --Start from scratch,
 same capacity.
 end;--wipe_out
-
+```
 [2]: Some Eiffel systems actually do allow Void to be used here, but the “void entity of type ITEM” solution always works.
 
 ### 6.3.4 Is_equal
@@ -1356,7 +1343,7 @@ We saw in Section 4.5.2 how clone first makes its Result a bit-by-bit copy of th
 and then requests *“Result.copy(<original>)”* (Listing 4.4).
 That bit-by-bit copy has a major (and unpleasant) influence on how we redefine copy.
 
-```Eiffel
+```python
 is_equal
 (other:
 like Current):
