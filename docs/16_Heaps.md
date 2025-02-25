@@ -59,11 +59,21 @@ the root items of both subtrees.” A tree like that is shown in Figure 16.1.
 With this arrangement, front is O(1),
 since the front item is right there at the root. 
 
-##### TODO
-
-#### Figure 16.1 A priority queue.
-
-The belts are ranked as follows: White < Gold < Green < Blue < Red < Black. 
+```plantuml
+@startmindmap
+* (Black Belt, Morton)
+** (Black Belt, Apodaca)
+*** (Bed Belt, Wu)
+**** (White Belt, Carter)
+*** (Black Belt, Zalewski)
+**** (Red Belt, Heidt)
+** (Red Belt, Young)
+*** (Gold Belt, Morris)
+**** (Gold Belt, Powell)
+**** (White Belt, McNeil)
+@endmindmap
+```
+#### Figure 16.1 A priority queue. The belts are ranked as follows: White < Gold < Green < Blue < Red < Black. 
 
 An enqueue starts by adding the new item into an empty subtree, and then moving it up (trading places with its parent) until its parent is “>=” it.
 Thus, the time complexity of insert is the height of the tree, which is O(log N) if the tree is balanced. 
@@ -88,7 +98,25 @@ However, only binary trees of certain sizes can possibly be full:
 trees with 1 item, 3 items, 7 items, 15 items, etc.—in other words, trees with 2” — 1 items.
 For other sizes, we need balanced trees that are a little less restrictive in form. 
 
-##### TODO
+```plantuml
+@startmindmap
+* (Black Belt, Morton)
+** (Black Belt, Apodaca)
+*** (Bed Belt, Wu)
+**** (Gold Belt, Melendez)
+**** (White Belt, Carter)
+*** (Black Belt, Zalewski)
+**** (Red Belt, Heldt)
+**** (Blue Belt, Shater)
+** (Red Belt, Young)
+*** (Blue Belt, Odegaard)
+**** (Gold Belt, Quintero)
+**** (Green Belt, Ng)
+*** (Gold Belt, Morris)
+**** (Gold Belt, Powell)
+**** (White Belt, McNeil)
+@endmindmap
+```
 
 #### Figure 16.2 A full tree. 
 
@@ -103,8 +131,20 @@ Thus, instead of going over how to implement priority queues specifically,
 let us concentrate on heaps.
 Implementations of linear and heap-based priority queues are too straightforward for us to study at this point. 
 
-##### TODO
-
+```plantuml
+@startmindmap
+* (Black Belt, Morton)
+** (Black Belt, Apodaca)
+*** (Bed Belt, Wu)
+**** (Gold Belt, Melendez)
+**** (White Belt, Carter)
+*** (Black Belt, Zalewski)
+**** (Red Belt, Heldt)
+** (Red Belt, Young)
+*** (Blue Belt, Odegaard)
+*** (Gold Belt, Morris)
+@endmindmap
+```
 #### Figure 16.3 A complete tree. 
 
 ## 16.2 Heaps
@@ -329,8 +369,22 @@ end ——class BINARY_TREE_ARRAY
 ```
 Listing 16.2 Class BINARY_TREE_ARRAY a common ancestor to BINARY_SEARCH_TREE_ARRAY and HEAP_ARRAY
 
-##### TODO
-
+```plantuml
+@startmindmap
+* 1
+** 2
+*** 4
+**** 8
+**** 9
+*** 5
+**** 10
+**** 11
+** 3
+*** 6
+**** 12
+*** 7
+@endmindmap
+```
 #### Figure 16.4 The mapping of a 12-item heap onto an internal array. 
 
 
@@ -399,19 +453,135 @@ Well, if it is, we swap them.
 We keep tumbling the new item up until it either comes to rest below a greater or equal parent, or becomes the root of the whole heap.
 This process is illustrated in Figure 16.6. 
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
 
+object "(Black Belt, Morton)" as morton
+object "(Red Belt, Apodaca)" as apodaca
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+object "(Blue Belt, Zalewski)" as zalewski
+
+morton -down-> apodaca
+apodaca -down-> wu
+wu -down-> melendez
+wu -down-> carter
+apodaca -down-> zalewski
+zalewski -down-> heldt
+morton -down-> young
+young -down-> odegaard
+young -down-> morris
+
+@enduml
+```
 a. Into this heap, (Black Belt, Baker) will be added. 
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
+
+object "(Black Belt, Morton)" as morton
+object "(Red Belt, Apodaca)" as apodaca
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+object "(Blue Belt, Zalewski)" as zalewski
+
+
+morton -down-> apodaca
+apodaca -down-> wu
+wu -down-> melendez
+wu -down-> carter
+apodaca -down-> zalewski
+zalewski -down-> heldt
+morton -down-> young
+young -down-> odegaard
+young -down-> morris
+
+object "(Black Belt, Baker)" as baker
+zalewski -down-> baker
+baker ..> zalewski : swap
+@enduml
+```
 b. Place the new item in the next available complete tree slot. It is “>” its parent’s item, so they will have to be exchanged. 
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
 
+object "(Black Belt, Morton)" as morton
+object "(Red Belt, Apodaca)" as apodaca
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+object "(Blue Belt, Zalewski)" as zalewski
+
+object "(Black Belt, Baker)" as baker
+
+morton -down-> apodaca
+apodaca -down-> wu
+wu -down-> melendez
+wu -down-> carter
+apodaca -down-> baker
+baker -down-> heldt
+baker -down-> zalewski
+morton -down-> young
+young -down-> odegaard
+young -down-> morris
+
+
+baker ..> apodaca : swap
+@enduml
+```
 c. It is “>” its new parent’s item, so they will have to be exchanged. 
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
 
+object "(Black Belt, Morton)" as morton
+object "(Black Belt, Baker)" as baker
+
+object "(Red Belt, Apodaca)" as apodaca
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+object "(Blue Belt, Zalewski)" as zalewski
+
+
+morton -down-> baker
+baker -down-> wu
+wu -down-> melendez
+wu -down-> carter
+baker -down-> apodaca
+apodaca -down-> heldt
+apodaca -down-> zalewski
+morton -down-> young
+young -down-> odegaard
+young -down-> morris
+
+
+baker ..> morton : swap
+@enduml
+```
 d. It is “<=” its new parent’s item, so we are done. 
 
 #### Figure 16.6 Inserting a new item into a heap. (The new item is marked with a black border.) 
@@ -482,18 +652,144 @@ So we simply move the item from the last position to the root (Figure 16.7a).
 It could be out of place in its new position, so we compare it with its children.
 If it is “<” at least one of its children, then it must be swapped.
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
 
+object "(Black Belt, Morton)" as morton
+object "(Black Belt, Baker)" as baker
+
+object "(Red Belt, Apodaca)" as apodaca
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Green Belt, Heldt)" as heldt
+
+object "(Blue Belt, Zalewski)" as zalewski
+
+note to right of zalewski
+  Delete
+end note
+
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+
+
+
+morton -down-> baker
+baker -down-> wu
+wu -down-> melendez
+wu -down-> carter
+baker -down-> apodaca
+apodaca -down-> heldt
+apodaca -down-> zalewski
+morton -down-> young
+young -down-> odegaard
+young -down-> morris
+
+morton <.. zalewski : replace
+@enduml
+```
 a. The last-indexed item will be moved to the root. 
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
 
+object "(Blue Belt, Zalewski)" as zalewski #darkgray
+object "(Black Belt, Baker)" as baker
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Red Belt, Apodaca)" as apodaca
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+
+
+zalewski --> baker
+baker --> wu
+wu --> melendez
+wu --> carter
+baker --> apodaca
+apodaca --> heldt
+zalewski --> young
+young --> odegaard
+young --> morris
+
+baker ..> zalewski : swap
+zalewski ..> young : other child is greater
+
+@enduml
+```
 b. It is “<” at least one of its children, so it must be exchanged with the greater child. 
 
+```plantuml
+@startuml
+top to bottom direction
+
+
+object "(Black Belt, Baker)" as baker
+object "(Blue Belt, Zalewski)" as zalewski
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Red Belt, Apodaca)" as apodaca
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+
+
+baker --> zalewski
+zalewski --> wu
+wu --> melendez
+wu --> carter
+zalewski --> apodaca
+apodaca --> heldt
+baker --> young
+young --> odegaard
+young --> morris
+
+wu ..> zalewski : other child is greater
+zalewski ..> apodaca : swap
+@enduml
+```
 c. It is “<” at least one of its children, so it must be exchanged with the greater child. 
 
-##### TODO
+```plantuml
+@startuml
+top to bottom direction
 
+
+object "(Black Belt, Baker)" as baker
+object "(Red Belt, Apodaca)" as apodaca
+object "(Gren Belt, Wu)" as wu
+object "(Gold Belt, Melendez)" as melendez
+object "(White Belt, Carter)" as carter
+object "(Blue Belt, Zalewski)" as zalewski
+object "(Green Belt, Heldt)" as heldt
+object "(Red Belt, Young)" as young
+object "(Blue Belt, Odegaard)" as odegaard
+object "(Gold Belt, Morris)" as morris
+
+
+baker --> apodaca
+apodaca --> wu
+wu --> melendez
+wu --> carter
+apodaca --> zalewski
+zalewski --> heldt
+baker --> young
+young --> odegaard
+young --> morris
+
+heldt ..> zalewski : Ok
+
+@enduml
+```
 d. It is “>=” all of its children, so we are done. 
 
 #### Figure 16.7 Deleting the top item from a heap. (The item being moved is marked with a black border.) 

@@ -1151,7 +1151,7 @@ end
 
 [1]: This is a simplified form of loop. The complete form is presented in Section 12.2.1.
 
-```python
+```pythongit p
 insert_on_left
 (new_item:
 
@@ -1460,7 +1460,7 @@ we could not use items.out even if class ARRAY provided a good out feature
 It is up to us to write a feature that results in a string of the form specified in out’s description.
 One such implementation is shown in Listing 6.11.
 
-```Eiffel
+```python
 out:
 STRING is
 --Returns "< <1st item>.out...<last item>.out >".
@@ -2041,7 +2041,7 @@ results in an array whose elements are all the entities of the current object ex
 The strip expression allows us to write much stronger postconditions.
 For example, the postcondition for move_right can now be written as
 
-```Eifffel
+```python
 ensure
     not_off_left: not is_off_left; 
     -- The cursor is one step to the right of where it was.
