@@ -13,6 +13,7 @@ Our version of LIST was inspired by their predecessor,
 presented in [3],but it offers a slightly different interface.
 
 ## 6.1 What a LIST ls and What It Does
+
 While an ARRAY keeps track of objects by an absolute position
 (e.g., “the object at position 7”),
 a LIST organizes them by relative position (“the object immediately to the right of this object”).
@@ -69,7 +70,7 @@ Thus, we start out with an external view of a LIST shown in Figure 6.2,
 with features *move_left* and *move_right*.
 The precondition for *move_left* is that we can be anywhere but off-left,
 and for *move_right*, we can be anywhere but off-right.
-To be able to specify these preconditions, 
+To be able to specify these preconditions,
 and to give our user a way to check whether or not the cursor is off-left or off-right,
 we supply Boolean features *is_off_left* and *is_off_right*.
 
@@ -208,6 +209,7 @@ a_list *--> an_item04
 Figure 6.3 External view of a LIST object, take 2: all features that support movement.
 
 ### 6.1.2 What an Empty LIST Looks Like
+
 Having  described  how *move_left, move_right, move_off_left, move_off_right, is_off_left,* and *is_off_right* interact,
 we can specify what an empty *LIST* looks like. If a LIST is empty, then:
 
@@ -217,7 +219,7 @@ we can specify what an empty *LIST* looks like. If a LIST is empty, then:
 4. If it is off-right and *move_left* is requested, it will become off-left.
 
 The four features that are most affected by these observations are *make*,
-since it has to make a new empty list; *is_empty*, 
+since it has to make a new empty list; *is_empty*,
 which reports if the list is empty; *wipe_out*, which empties a list;
 and *length*, which reports how many items are in the list
 (the first observation could be written as “length = 0”).
@@ -245,7 +247,7 @@ Now we can look at postconditions of make.
 The first and most obvious one is that the list is empty.
 According to the class invariant,
 this automatically means that its length is zero.
-But is it off-left or off-right? 
+But is it off-left or off-right?
 We must either make a choice and specify it in the contract,
 or not specify our choice at all,
 thus forcing the user to do an explicit *move_off_left or* *move_off_right* right after the make.
@@ -294,7 +296,7 @@ We cannot insert it exactly *under* the cursor,
 since there is something there already:
 either an item, or an off-left or off-right delimiter.
 We can, however, insert the new item immediately to the left or immediately to the right of the cursor.
-Not knowing 
+Not knowing
 
 whether the insert-on-left or insert-on-right behavior will be more convenient to our user,
 we will provide both features: *insert_on_left and insert_on_right*.
@@ -313,7 +315,7 @@ The skeleton of these features is shown in Listing 6.4.
 Feature `delete` deletes the `item` under the `cursor` from the list.
 For this to work, the cursor can be neither off-left nor off-right.
 Also, it has to move a step either to the left or to the right,
-because it cannot stay with the deleted item; 
+because it cannot stay with the deleted item;
 since the choice is, once again, arbitrary, we will move it a step to the right.
 This routine’s skeleton is also shown in Listing 6.4.
 
@@ -476,7 +478,7 @@ map a_list {
     move_left() =>
     move_right() =>
     is_empty =>
-    item => 
+    item =>
     move_off_left() =>
     move_off_right() =>
     is_full =>
@@ -506,11 +508,12 @@ Putting all these skeletons together, we get the contract.
 To save printing space, we present it after discussing deferred classes in the next section.
 
 ### 6.2 How a LIST Does What It Does: Multiple Implementations
+
 The `LIST` is the first object structure for which we will provide multiple implementations.
 First,let us address the logistics of doing that.
 
 One way to do multiple implementations is to have a copy of the class LIST for each implementation,
-and simply compile in the one we want to use. 
+and simply compile in the one we want to use.
 The problem with this approach is that if we do make changes in the interface
 (the contract),
 we will have to remember to make them in all three versions.
@@ -520,7 +523,7 @@ Alas, experience shows that human memory is not a tool suitable for keeping mult
 
 Instead, what we can do is set up a little hierarchy of classes.
 At the top will be a deferred class called “LIST 1”,
-which will be the keeper of the contract, but will have no implementation. 
+which will be the keeper of the contract, but will have no implementation.
 For each implementation, we will create a subclass of LIST.
 As subcontractors, objects in those classes will have to follow contracts that are compatible to LIST objects
 (see the section on subcontracting).
@@ -538,9 +541,9 @@ While we were at it, we reorganized the routines under several **feature** secti
         author: ""
         date: "$Date$"
         revision: "$Revision$"
-       
+
        deferred class MY_LIST [ITEM]
-       
+
        inherit
         ANY
          undefine --to make them deferred
@@ -548,7 +551,7 @@ While we were at it, we reorganized the routines under several **feature** secti
          redefine --to add comments or improve the contract
           out, is_equal, copy
          end;
-       
+
        feature --Creation and initialization
         make
           -- Initialize to get an empty, off-left list.
@@ -557,7 +560,7 @@ While we were at it, we reorganized the routines under several **feature** secti
           empty: is_empty;
           off_left: is_off_left;
          end;
-       
+
        feature -- Moving through the list
         move_left
           -- Move the cursor one step to the left.
@@ -568,7 +571,7 @@ While we were at it, we reorganized the routines under several **feature** secti
           not_off_right: not is_off_right;
           -- The cursor is one step to the left of where it was.
          end;
-       
+
         move_right
           -- Move the cursor one step to the right.
          require
@@ -578,28 +581,28 @@ While we were at it, we reorganized the routines under several **feature** secti
           not_off_left: not is_off_left;
           -- The cursor is one step to the right of where it was.
          end;
-       
+
         move_off_left
           --Move the cursor to the off-left position.
          deferred
          ensure
           off_left: is_off_left;
          end;
-       
+
         move_off_right -- Move the cursor to the off-right position.
          deferred
          ensure
           off_right: is_off_right;
          end;
-       
+
         is_off_left: BOOLEAN -- Is the cursor off-left?
          deferred
          end;
-       
+
         is_off_right: BOOLEAN -- Is the cursor off-right?
          deferred
          end;
-       
+
        feature -- Moving items into and out of the list
         insert_on_left (new_item: ITEM)
           -- Insert new_item to the left of the cursor.
@@ -611,7 +614,7 @@ While we were at it, we reorganized the routines under several **feature** secti
           one_more_item: length = old length + 1;
           -- The cursor is on the same item as it was before.
          end;
-       
+
         insert_on_right (new_item: ITEM)
           -- Insert new_item to the right of the cursor.
          require
@@ -622,7 +625,7 @@ While we were at it, we reorganized the routines under several **feature** secti
           one_more_item: length = old length + 1;
           -- The cursor is on the same item as it was before.
          end;
-       
+
         delete --Remove the item under the cursor from the list.
          require
           not_off_left: not is_off_left;
@@ -632,56 +635,56 @@ While we were at it, we reorganized the routines under several **feature** secti
           one_less_item: length = old length - 1;
           -- The cursor is on the item to the right of the deleted one.
          end;
-       
+
         wipe_out --Make this list empty and off-left.
          deferred
          ensure
           empty: is_empty;
           off_left: is_off_left;
          end;
-       
+
         replace (new_item: ITEM)
           -- Replaces the item under the cursor with new_item.
          require
           not_off_left: not is_off_left;
           not_off_right: not is_off_right;
-       
+
          deferred
          ensure
           item_replaced: item = new_item;
           length_unchanged: length = old length;
          end;
-       
+
         item: ITEM --The item under the cursor.
          deferred
          end;
-       
+
        feature --Sizing
         is_empty: BOOLEAN
           -- Is this list empty?
          deferred
          end;
-       
+
         is_full: BOOLEAN
           -- Is there no room in this list for one more item?
          deferred
          end;
-       
+
         length: INTEGER --The number of items currently in this list.
          deferred
          end;
-       
+
        feature --Comparisons and copying
         is_equal (other: like Current): BOOLEAN
           -- Do this list and other keep track of the same items in the same order?
          deferred
          end;
-       
+
         cursor_matches (other: like Current): BOOLEAN
           -- Is this list\x00s cursor the same distance from off-left as other\x00s cursor? (esc)
          deferred
          end;
-       
+
         copy (other: like Current) --Copies other onto current.
          deferred
          ensure then
@@ -689,24 +692,25 @@ While we were at it, we reorganized the routines under several **feature** secti
            cursor_matches
             (other);
          end;
-       
+
        feature --Conversions
         out: STRING --"< <1st item>.out ... <last item>.out >".
          deferred
          end;
-       
+
        invariant
-       
+
         not_both_off_left_and_off_right: not (is_off_left and is_off_right);
         not_on_item_if_empty: is_empty implies (is_off_left or is_off_right);
         empty_iff_zero_length: is_empty = (length = 0);
         length_not_negative: length >= 0;
-       
+
        end
 ```
 Listing 6.6 Deferred class LIST with the contract.
 
 ## 6.3 An Implementation Using an ARRAY
+
 In our first implementation,
 we use an ARRAY object inside the LIST object to keep track of the items.
 Recall that in Eiffel, ARRAY objects are resizable,
@@ -751,7 +755,7 @@ map a_list {
     move_left() =>
     move_right() =>
     is_empty =>
-    item => 
+    item =>
     move_off_left() =>
     move_off_right() =>
     is_full =>
@@ -793,7 +797,7 @@ would be either off-right or off-left ... for which we have no position numbers!
 How do we indicate “off-left” and “off-right?”
 
 To answer that question, we need to first implement move_left and move_right.
-Then, using move_left when the cursor is on the leftmost item 
+Then, using move_left when the cursor is on the leftmost item
 (position 1 in this implementation)
 should yield an off-left cursor;
 similarly, using move_right when the cursor is on the rightmost item
@@ -806,11 +810,12 @@ Now we see that the list is off-left when cursor = 0 and off-right when cursor =
 so the range of the cursor entity is actually `[0,...,length + 1]`.
 
 ### 6.3.2 Creating a LIST
+
 Now we are ready to write make and make_capacity:
 They need to create an object that looks like the one in Figure 6.6.
 In fact, the implementations of *resize, is_off_left,is_off_right, move_off_left, and move_off_right*
 also fall into place.
-The result is the early version of class LIST_ARRAY, 
+The result is the early version of class LIST_ARRAY,
 which is shown in Listing 6.7.
 
 ```plantuml
@@ -820,7 +825,7 @@ map a_list {
     move_left() =>
     move_right() =>
     is_empty =>
-    item => 
+    item =>
     move_off_left() =>
     move_off_right() =>
     is_full =>
@@ -860,29 +865,29 @@ This one is off-left, as would be made by make according to its postcondition.
          author: ""
          date: "$Date$"
          revision: "$Revision$"
-       
+
        class MY_LIST_ARRAY [ITEM]
-       
+
        inherit
          MY_LIST [ITEM]
        create
          make,
          make_capacity
-       
+
        feature {LIST_ARRAY}
          --Visible only to similar lists
          items: ARRAY [ITEM]; --The array tracking the items.
-       
+
          cursor: INTEGER; --Index within items of the item under the cursor.
-       
+
          make_capacity (initial_capacity: INTEGER)
-       
+
            require
              initial_capacity >= 0;
-       
+
            do
              capacity := initial_capacity;
-       
+
              create items.make (1, initial_capacity);
                --First item is always at index 1.
              length := 0;
@@ -890,27 +895,27 @@ This one is off-left, as would be made by make according to its postcondition.
              cursor := 0;
              --Start out off-left.
            end;
-       
+
          resize (new_capacity: INTEGER)
              --Resizes the list to new_capacity. Could be very expensive.
            require
              new_capacity >= 0;
-       
+
            do
              capacity := new_capacity;
-       
+
              items.resize (1, new_capacity); --First item is always at index 1.
                --May have to truncate this list to fit the new array.
              if cursor > capacity + 1 then
                cursor := capacity + 1;
              end;
-       
+
              if length > capacity then
                length := capacity;
              end;
-       
+
            end;
-       
+
        feature --Sizing
          capacity: INTEGER; --Current capacity.
          length: INTEGER; --The number of items currently in this list.
@@ -918,51 +923,51 @@ This one is off-left, as would be made by make according to its postcondition.
            do
              Result := length = 0;
            end;
-       
+
          is_full: BOOLEAN -- Is there is no room in this list for one more item?
            do
              Result := length = capacity;
            end;
-       
+
        feature -- Moving through the list
          move_left --Move the cursor one step to the left.
            do
              cursor := cursor - 1;
-       
+
            end;
-       
+
          move_right --Move the cursor one step to the right.
            do
              cursor := cursor + 1;
-       
+
            end;
-       
+
          move_off_left --Move the cursor to the off-left position.
            do
              cursor := 0;
-       
+
            end;
-       
+
          move_off_right --Move the cursor to the off-right position.
            do
              cursor := length + 1;
            end;
-       
+
          is_off_left: BOOLEAN --Is the cursor off-left?
            do
              Result := cursor = 0;
            end;
-       
+
          is_off_right: BOOLEAN --Is the cursor off-right?
            do
              Result := cursor = length + 1;
            end;
-       
+
        invariant
          capacity_not_negative:
-       
+
            0 <= capacity;
-       
+
          length_in_range:
            length <= capacity;
          cursor_in_range:
@@ -970,7 +975,7 @@ This one is off-left, as would be made by make according to its postcondition.
          good_array:
            items /= Void and then
            items.count = capacity and items.lower = 1;
-       
+
        end
 ```
 Listing 6.7 Initial sketch of class LIST_ARRAY:
@@ -1004,6 +1009,7 @@ They are not part of the contract; they are just safety checks we put in for our
 Our user will never see them (unless we show him or her our source code).
 
 ### 6.3.3 Inserting and Deleting ITEMs
+
 With move_left and move_right,
 we started with a routine that would work in the middle of the list,
 and then adapted the internal object structure so that the same routines work at both ends
@@ -1423,7 +1429,7 @@ end;
 ```
 Listing 6.10 Feature copy for class LIST_ARRAY.
 
-If it was not for clone, 
+If it was not for clone,
 copying other onto Current would mean resizing items if necessary to other.length,
 copying the item references from other,
 and wiping out the item references in positions between other.length and Current’s old length.
@@ -1485,7 +1491,7 @@ Listing 6.12 presents a tester object for testing this list implementation.
 The parts that are implementation dependent are marked with “--imp.”
 Note that there are only three such places in the program!
 
-```Eiffel
+```python
 class LIST_TESTER
 
 creation test
@@ -2030,7 +2036,7 @@ For example, the postcondition for move_right can now be written as
 
 ```python
 ensure
-    not_off_left: not is_off_left; 
+    not_off_left: not is_off_left;
     -- The cursor is one step to the right of where it was.
     strip(cursor).is_equal(old deep_copy(strip(cursor)));
 ```
@@ -2039,7 +2045,7 @@ With one line, we specified that no entity except the cursor changed about this 
 
 A limitation of strip() is that it only works on features that are entities.
 Thus, the new assertion above will check that length stayed the same only if length is implemented as an entity and not a function.
-As was mentioned in Section 3.1.2, 
+As was mentioned in Section 3.1.2,
 the “nothing else changes” postconditions are rarely used for practical reasons,
 and the presence of **strip()** does not change that.
 Consider LIST_ARRAY’s routines, for example:
@@ -2064,7 +2070,7 @@ In other words, if there are N items in an object structure,
 we want to know in what way the time it takes to do a specific operation is proportional to N.
 This is known as the time complexity of that operation.
 Similarly, the space complexity is an expression that indicates how the amount of additional space needed to run the operation is related to N.
-By evaluating performance of algorithms as a function of N, 
+By evaluating performance of algorithms as a function of N,
 we have whatwe need to compare competing implementations of routines,
 so that we can choose the best one for the job.
 
@@ -2118,8 +2124,8 @@ in increasing order:
 O(1) (meaning that the complexity of the operation is not dependent on WN at all, so it is O(N^0))); O(log N); O(N); O(N log N); and O(N^2) (this list is by no means exhaustive).
 
 * O(1) is often called “constant complexity,”
-* O(log N) is “logarithmic complexity,” 
-* O(N) is “linear,” and 
+* O(log N) is “logarithmic complexity,”
+* O(N) is “linear,” and
 * O(N^2) is “quadratic.”
 
 Since we tend to discuss time complexity much more frequently than space complexity,
@@ -2205,13 +2211,13 @@ It provides good (O(1)) performance in movement routines,
 but average and worst case time complexity for insertion and deletion are poor (O(N)).
 
 # Exercises
-1. 
+1.
   1. Implement deferred class LIST.
   2. Implement and test class LIST_ARRAY.
 2. Use the strip() expression to strengthen the postconditions of the routines in each list implementation that you have written. Can LIST_TESTER be simplified now?
 If so, simplify it.
 3. You have a list implemented as LIST_ARRAY.
-  1. It is tracking 1,000,000 items, you insert an item at its left end, and it  takes x seconds. 
+  1. It is tracking 1,000,000 items, you insert an item at its left end, and it  takes x seconds.
      How long would you expect to wait if the list had 2,000,000 items?
   2. It is tracking 1,000,000 items, you insert an item at its right end, and it  takes x seconds.
      How long would you expect to wait if the list had 2,000,000 items?
