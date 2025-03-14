@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="562pt" height="316pt" viewBox="0.00 0.00 562.00 316.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 312)">
+<title>BinaryTree</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-312 558,-312 558,4 -4,4"/>
+<!-- 1 -->
+<g id="node1" class="node">
+<title>1</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="277" cy="-283" rx="25" ry="25"/>
+</g>
+<!-- 2 -->
+<g id="node2" class="node">
+<title>2</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="205" cy="-197" rx="25" ry="25"/>
+</g>
+<!-- 1&#45;&gt;2 -->
+<g id="edge1" class="edge">
+<title>1-&gt;2</title>
+<path fill="none" stroke="#000000" d="M260.6621,-263.4853C248.8788,-249.4108 233.0416,-230.4942 221.2733,-216.4375"/>
+</g>
+<!-- 3 -->
+<g id="node3" class="node">
+<title>3</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="349" cy="-197" rx="25" ry="25"/>
+</g>
+<!-- 1&#45;&gt;3 -->
+<g id="edge2" class="edge">
+<title>1-&gt;3</title>
+<path fill="none" stroke="#000000" d="M293.3379,-263.4853C305.1212,-249.4108 320.9584,-230.4942 332.7267,-216.4375"/>
+</g>
+<!-- 4 -->
+<g id="node4" class="node">
+<title>4</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="97" cy="-111" rx="25" ry="25"/>
+</g>
+<!-- 2&#45;&gt;4 -->
+<g id="edge3" class="edge">
+<title>2-&gt;4</title>
+<path fill="none" stroke="#000000" d="M185.442,-181.426C165.9904,-165.9368 136.3056,-142.2989 116.7774,-126.7487"/>
+</g>
+<!-- 5 -->
+<g id="node5" class="node">
+<title>5</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="205" cy="-111" rx="25" ry="25"/>
+</g>
+<!-- 2&#45;&gt;5 -->
+<g id="edge4" class="edge">
+<title>2-&gt;5</title>
+<path fill="none" stroke="#000000" d="M205,-171.6623C205,-160.4648 205,-147.3331 205,-136.1566"/>
+</g>
+<!-- 6 -->
+<g id="node6" class="node">
+<title>6</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="349" cy="-111" rx="25" ry="25"/>
+</g>
+<!-- 3&#45;&gt;6 -->
+<g id="edge5" class="edge">
+<title>3-&gt;6</title>
+<path fill="none" stroke="#000000" d="M349,-171.6623C349,-160.4648 349,-147.3331 349,-136.1566"/>
+</g>
+<!-- 7 -->
+<g id="node7" class="node">
+<title>7</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="457" cy="-111" rx="25" ry="25"/>
+</g>
+<!-- 3&#45;&gt;7 -->
+<g id="edge6" class="edge">
+<title>3-&gt;7</title>
+<path fill="none" stroke="#000000" d="M368.558,-181.426C388.0096,-165.9368 417.6944,-142.2989 437.2226,-126.7487"/>
+</g>
+<!-- 8 -->
+<g id="node8" class="node">
+<title>8</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="25" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 4&#45;&gt;8 -->
+<g id="edge7" class="edge">
+<title>4-&gt;8</title>
+<path fill="none" stroke="#000000" d="M80.6621,-91.4853C68.8788,-77.4108 53.0416,-58.4942 41.2733,-44.4375"/>
+</g>
+<!-- 9 -->
+<g id="node9" class="node">
+<title>9</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="97" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 4&#45;&gt;9 -->
+<g id="edge8" class="edge">
+<title>4-&gt;9</title>
+<path fill="none" stroke="#000000" d="M97,-85.6623C97,-74.4648 97,-61.3331 97,-50.1566"/>
+</g>
+<!-- 10 -->
+<g id="node10" class="node">
+<title>10</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="169" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 5&#45;&gt;10 -->
+<g id="edge9" class="edge">
+<title>5-&gt;10</title>
+<path fill="none" stroke="#000000" d="M195.1628,-87.5001C190.0416,-75.2659 183.8018,-60.3599 178.7006,-48.1737"/>
+</g>
+<!-- 11 -->
+<g id="node11" class="node">
+<title>11</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="241" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 5&#45;&gt;11 -->
+<g id="edge10" class="edge">
+<title>5-&gt;11</title>
+<path fill="none" stroke="#000000" d="M214.8372,-87.5001C219.9584,-75.2659 226.1982,-60.3599 231.2994,-48.1737"/>
+</g>
+<!-- 12 -->
+<g id="node12" class="node">
+<title>12</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="313" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 6&#45;&gt;12 -->
+<g id="edge11" class="edge">
+<title>6-&gt;12</title>
+<path fill="none" stroke="#000000" d="M339.1628,-87.5001C334.0416,-75.2659 327.8018,-60.3599 322.7006,-48.1737"/>
+</g>
+<!-- 13 -->
+<g id="node13" class="node">
+<title>13</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="385" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 6&#45;&gt;13 -->
+<g id="edge12" class="edge">
+<title>6-&gt;13</title>
+<path fill="none" stroke="#000000" d="M358.8372,-87.5001C363.9584,-75.2659 370.1982,-60.3599 375.2994,-48.1737"/>
+</g>
+<!-- 14 -->
+<g id="node14" class="node">
+<title>14</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="457" cy="-25" rx="25" ry="25"/>
+</g>
+<!-- 7&#45;&gt;14 -->
+<g id="edge13" class="edge">
+<title>7-&gt;14</title>
+<path fill="none" stroke="#000000" d="M457,-85.6623C457,-74.4648 457,-61.3331 457,-50.1566"/>
+</g>
+<!-- 15 -->
+<g id="node15" class="node">
+<title>15</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="529" cy="-25" rx="25" ry="25"/>
+<text text-anchor="middle" x="529" y="-20.8" font-family="Times,serif" font-size="14.00" fill="#000000">log 15</text>
+</g>
+<!-- 7&#45;&gt;15 -->
+<g id="edge14" class="edge">
+<title>7-&gt;15</title>
+<path fill="none" stroke="#000000" d="M473.3379,-91.4853C485.1212,-77.4108 500.9584,-58.4942 512.7267,-44.4375"/>
+</g>
+</g>
+</svg>

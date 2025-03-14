@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="415pt" height="440pt" viewBox="0.00 0.00 414.73 440.00">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 436)">
+<title>TreeArray</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-436 410.7304,-436 410.7304,4 -4,4"/>
+<!-- idx1 -->
+<g id="node1" class="node">
+<title>idx1</title>
+<polygon fill="none" stroke="#000000" points="117.6921,-432 -.2313,-432 -.2313,-396 117.6921,-396 117.6921,-432"/>
+<text text-anchor="middle" x="58.7304" y="-409.8" font-family="Times,serif" font-size="14.00" fill="#000000">1 → (spreakley,...)</text>
+</g>
+<!-- idx2 -->
+<g id="node2" class="node">
+<title>idx2</title>
+<polygon fill="none" stroke="#000000" points="117.6921,-388 -.2313,-388 -.2313,-352 117.6921,-352 117.6921,-388"/>
+<text text-anchor="middle" x="58.7304" y="-365.8" font-family="Times,serif" font-size="14.00" fill="#000000">2 → (scramoge,...)</text>
+</g>
+<!-- idx1&#45;&gt;idx2 -->
+<!-- n1 -->
+<g id="node11" class="node">
+<title>n1</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="305.7304" cy="-414" rx="11" ry="11"/>
+<text text-anchor="middle" x="305.7304" y="-409.8" font-family="Times,serif" font-size="14.00" fill="#000000">1</text>
+</g>
+<!-- idx1&#45;&gt;n1 -->
+<g id="edge19" class="edge">
+<title>idx1-&gt;n1</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M117.5859,-414C176.626,-414 235.6662,-414 294.7063,-414"/>
+</g>
+<!-- idx3 -->
+<g id="node3" class="node">
+<title>idx3</title>
+<polygon fill="none" stroke="#000000" points="114.209,-344 3.2518,-344 3.2518,-308 114.209,-308 114.209,-344"/>
+<text text-anchor="middle" x="58.7304" y="-321.8" font-family="Times,serif" font-size="14.00" fill="#000000">3 → (knaptoft,...)</text>
+</g>
+<!-- idx2&#45;&gt;idx3 -->
+<!-- n2 -->
+<g id="node12" class="node">
+<title>n2</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="277.7304" cy="-370" rx="11" ry="11"/>
+<text text-anchor="middle" x="277.7304" y="-365.8" font-family="Times,serif" font-size="14.00" fill="#000000">2</text>
+</g>
+<!-- idx2&#45;&gt;n2 -->
+<g id="edge20" class="edge">
+<title>idx2-&gt;n2</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M117.7577,-370C167.3326,-370 216.9075,-370 266.4823,-370"/>
+</g>
+<!-- idx4 -->
+<g id="node4" class="node">
+<title>idx4</title>
+<polygon fill="none" stroke="#000000" points="112.7304,-300 4.7304,-300 4.7304,-264 112.7304,-264 112.7304,-300"/>
+<text text-anchor="middle" x="58.7304" y="-277.8" font-family="Times,serif" font-size="14.00" fill="#000000">4 → (rigolet,...)</text>
+</g>
+<!-- idx3&#45;&gt;idx4 -->
+<!-- n3 -->
+<g id="node13" class="node">
+<title>n3</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="336.7304" cy="-326" rx="11" ry="11"/>
+<text text-anchor="middle" x="336.7304" y="-321.8" font-family="Times,serif" font-size="14.00" fill="#000000">3</text>
+</g>
+<!-- idx3&#45;&gt;n3 -->
+<g id="edge21" class="edge">
+<title>idx3-&gt;n3</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M114.1132,-326C184.5507,-326 254.9882,-326 325.4256,-326"/>
+</g>
+<!-- idx5 -->
+<g id="node5" class="node">
+<title>idx5</title>
+<polygon fill="none" stroke="#000000" points="112.7304,-256 4.7304,-256 4.7304,-220 112.7304,-220 112.7304,-256"/>
+<text text-anchor="middle" x="58.7304" y="-233.8" font-family="Times,serif" font-size="14.00" fill="#000000">5 → (duddo,...)</text>
+</g>
+<!-- idx4&#45;&gt;idx5 -->
+<!-- n4 -->
+<g id="node14" class="node">
+<title>n4</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="218.7304" cy="-282" rx="11" ry="11"/>
+<text text-anchor="middle" x="218.7304" y="-277.8" font-family="Times,serif" font-size="14.00" fill="#000000">4</text>
+</g>
+<!-- idx4&#45;&gt;n4 -->
+<g id="edge22" class="edge">
+<title>idx4-&gt;n4</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M112.7929,-282C144.381,-282 175.9692,-282 207.5573,-282"/>
+</g>
+<!-- idx6 -->
+<g id="node6" class="node">
+<title>idx6</title>
+<polygon fill="none" stroke="#000000" points="115.314,-212 2.1468,-212 2.1468,-176 115.314,-176 115.314,-212"/>
+<text text-anchor="middle" x="58.7304" y="-189.8" font-family="Times,serif" font-size="14.00" fill="#000000">6 → (harbottle,...)</text>
+</g>
+<!-- idx5&#45;&gt;idx6 -->
+<!-- n5 -->
+<g id="node15" class="node">
+<title>n5</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="277.7304" cy="-238" rx="11" ry="11"/>
+<text text-anchor="middle" x="277.7304" y="-233.8" font-family="Times,serif" font-size="14.00" fill="#000000">5</text>
+</g>
+<!-- idx5&#45;&gt;n5 -->
+<g id="edge23" class="edge">
+<title>idx5-&gt;n5</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M113.0527,-238C164.1928,-238 215.333,-238 266.4731,-238"/>
+</g>
+<!-- idx7 -->
+<g id="node7" class="node">
+<title>idx7</title>
+<polygon fill="none" stroke="#000000" points="112.7304,-168 4.7304,-168 4.7304,-132 112.7304,-132 112.7304,-168"/>
+<text text-anchor="middle" x="58.7304" y="-145.8" font-family="Times,serif" font-size="14.00" fill="#000000">7 → (aa1st,...)</text>
+</g>
+<!-- idx6&#45;&gt;idx7 -->
+<!-- n6 -->
+<g id="node16" class="node">
+<title>n6</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="336.7304" cy="-194" rx="11" ry="11"/>
+<text text-anchor="middle" x="336.7304" y="-189.8" font-family="Times,serif" font-size="14.00" fill="#000000">6</text>
+</g>
+<!-- idx6&#45;&gt;n6 -->
+<g id="edge24" class="edge">
+<title>idx6-&gt;n6</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M115.4706,-194C185.4786,-194 255.4866,-194 325.4946,-194"/>
+</g>
+<!-- idx8 -->
+<g id="node8" class="node">
+<title>idx8</title>
+<polygon fill="none" stroke="#000000" points="112.7304,-124 4.7304,-124 4.7304,-88 112.7304,-88 112.7304,-124"/>
+<text text-anchor="middle" x="58.7304" y="-101.8" font-family="Times,serif" font-size="14.00" fill="#000000">8 → (flunary,...)</text>
+</g>
+<!-- idx7&#45;&gt;idx8 -->
+<!-- n7 -->
+<g id="node17" class="node">
+<title>n7</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="395.7304" cy="-150" rx="11" ry="11"/>
+<text text-anchor="middle" x="395.7304" y="-145.8" font-family="Times,serif" font-size="14.00" fill="#000000">7</text>
+</g>
+<!-- idx7&#45;&gt;n7 -->
+<g id="edge25" class="edge">
+<title>idx7-&gt;n7</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M113.0322,-150C203.5839,-150 294.1357,-150 384.6875,-150"/>
+</g>
+<!-- idx9 -->
+<g id="node9" class="node">
+<title>idx9</title>
+<polygon fill="none" stroke="#000000" points="112.7304,-80 4.7304,-80 4.7304,-44 112.7304,-44 112.7304,-80"/>
+<text text-anchor="middle" x="58.7304" y="-57.8" font-family="Times,serif" font-size="14.00" fill="#000000">9 → (dattuck,...)</text>
+</g>
+<!-- idx8&#45;&gt;idx9 -->
+<!-- n8 -->
+<g id="node18" class="node">
+<title>n8</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="159.7304" cy="-106" rx="11" ry="11"/>
+<text text-anchor="middle" x="159.7304" y="-101.8" font-family="Times,serif" font-size="14.00" fill="#000000">8</text>
+</g>
+<!-- idx8&#45;&gt;n8 -->
+<g id="edge26" class="edge">
+<title>idx8-&gt;n8</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M112.7812,-106C124.763,-106 136.7448,-106 148.7267,-106"/>
+</g>
+<!-- idx10 -->
+<g id="node10" class="node">
+<title>idx10</title>
+<polygon fill="none" stroke="#000000" points="112.7304,-36 4.7304,-36 4.7304,0 112.7304,0 112.7304,-36"/>
+<text text-anchor="middle" x="58.7304" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">10 → (bindle,...)</text>
+</g>
+<!-- idx9&#45;&gt;idx10 -->
+<!-- n9 -->
+<g id="node19" class="node">
+<title>n9</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="218.7304" cy="-62" rx="11" ry="11"/>
+<text text-anchor="middle" x="218.7304" y="-57.8" font-family="Times,serif" font-size="14.00" fill="#000000">9</text>
+</g>
+<!-- idx9&#45;&gt;n9 -->
+<g id="edge27" class="edge">
+<title>idx9-&gt;n9</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M112.7929,-62C144.381,-62 175.9692,-62 207.5573,-62"/>
+</g>
+<!-- n10 -->
+<g id="node20" class="node">
+<title>n10</title>
+<ellipse fill="#ffffff" stroke="#000000" cx="277.7304" cy="-18" rx="11" ry="11"/>
+<text text-anchor="middle" x="277.7304" y="-13.8" font-family="Times,serif" font-size="14.00" fill="#000000">10</text>
+</g>
+<!-- idx10&#45;&gt;n10 -->
+<g id="edge28" class="edge">
+<title>idx10-&gt;n10</title>
+<path fill="none" stroke="#000000" stroke-dasharray="1,5" d="M113.0527,-18C164.1928,-18 215.333,-18 266.4731,-18"/>
+</g>
+<!-- n1&#45;&gt;n2 -->
+<g id="edge10" class="edge">
+<title>n1-&gt;n2</title>
+<path fill="none" stroke="#000000" d="M299.7923,-404.6687C295.0406,-397.2018 288.4094,-386.7812 283.6599,-379.3178"/>
+</g>
+<!-- n1&#45;&gt;n3 -->
+<g id="edge11" class="edge">
+<title>n1-&gt;n3</title>
+<path fill="none" stroke="#000000" d="M309.4082,-403.5597C315.3745,-386.6233 327.0942,-353.3544 333.0573,-336.4267"/>
+<text text-anchor="middle" x="339.3058" y="-374.1899" font-family="Times,serif" font-size="14.00" fill="#000000">a heap</text>
+</g>
+<!-- n2&#45;&gt;n4 -->
+<g id="edge12" class="edge">
+<title>n2-&gt;n4</title>
+<path fill="none" stroke="#000000" d="M270.0293,-361.6195C265.629,-356.6593 260.129,-350.1593 255.7304,-344 243.2006,-326.4546 230.8053,-304.4981 224.02,-291.9781"/>
+</g>
+<!-- n2&#45;&gt;n5 -->
+<g id="edge13" class="edge">
+<title>n2-&gt;n5</title>
+<path fill="none" stroke="#000000" d="M277.7304,-358.7458C277.7304,-333.8072 277.7304,-274.1378 277.7304,-249.2258"/>
+<text text-anchor="middle" x="259.6585" y="-308.1758" font-family="Times,serif" font-size="14.00" fill="#000000">a heap</text>
+</g>
+<!-- n3&#45;&gt;n6 -->
+<g id="edge17" class="edge">
+<title>n3-&gt;n6</title>
+<path fill="none" stroke="#000000" d="M336.7304,-314.7458C336.7304,-289.8072 336.7304,-230.1378 336.7304,-205.2258"/>
+</g>
+<!-- n3&#45;&gt;n7 -->
+<g id="edge18" class="edge">
+<title>n3-&gt;n7</title>
+<path fill="none" stroke="#000000" d="M345.1492,-318.0557C349.7889,-313.2409 355.2889,-306.7409 358.7304,-300 383.2451,-251.9833 392.0735,-186.8973 394.7354,-161.147"/>
+<text text-anchor="middle" x="361.9562" y="-246.5745" font-family="Times,serif" font-size="14.00" fill="#000000">a heap</text>
+</g>
+<!-- n4&#45;&gt;n8 -->
+<g id="edge14" class="edge">
+<title>n4-&gt;n8</title>
+<path fill="none" stroke="#000000" d="M210.3116,-274.0557C205.6719,-269.2409 200.1719,-262.7409 196.7304,-256 172.2157,-207.9833 163.3873,-142.8973 160.7254,-117.147"/>
+</g>
+<!-- n4&#45;&gt;n9 -->
+<g id="edge15" class="edge">
+<title>n4-&gt;n9</title>
+<path fill="none" stroke="#000000" d="M218.7304,-270.8867C218.7304,-254.1934 218.7304,-221.6528 218.7304,-194 218.7304,-194 218.7304,-194 218.7304,-150 218.7304,-122.3472 218.7304,-89.8066 218.7304,-73.1133"/>
+<text text-anchor="middle" x="200.6585" y="-192.7" font-family="Times,serif" font-size="14.00" fill="#000000">a heap</text>
+</g>
+<!-- n5&#45;&gt;n10 -->
+<g id="edge16" class="edge">
+<title>n5-&gt;n10</title>
+<path fill="none" stroke="#000000" d="M277.7304,-226.8867C277.7304,-210.1934 277.7304,-177.6528 277.7304,-150 277.7304,-150 277.7304,-150 277.7304,-106 277.7304,-78.3472 277.7304,-45.8066 277.7304,-29.1133"/>
+<text text-anchor="middle" x="259.6585" y="-148.7" font-family="Times,serif" font-size="14.00" fill="#000000">a heap</text>
+</g>
+</g>
+</svg>

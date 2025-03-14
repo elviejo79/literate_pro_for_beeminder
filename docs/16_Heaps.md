@@ -180,43 +180,40 @@ In fact, a HEAP can do anything a BINARY_TREE can, so we can use inheritance to 
 The contract, shown in Listing 16.1, inherits BINARY_TREE’s contract (as well as the default, high-level implementations of routines such as out),
 and adds to it the features insert, delete, and is_full (compare it with the contract for BINARY_SEARCH_TREE in Listing 15.2). 
 
-```Eiffel
-deferred class HEAP[ITEM —> COMPARABLE] inherit 
-BINARY_TREE[JTEM]; 
+```python
+deferred class HEAP_EXAMPLE [ITEM -> COMPARABLE]
 
-feature ——Adding, removing, and finding items 
-insert (new_item: ITEM) is 
-——Insert new_item into this heap. 
+inherit
+	BINARY_TREE_EXAMPLE [ITEM]
+	redefine
+		is_equal
+	end
+feature -- Adding, removing, and finding items
+	insert (new_item: ITEM)
+			-- Insert new_item into this heap.
+		require
+			not_void: new_item /= Void
+			not_full: not is_full
+		deferred
+		ensure
+			size_after_insert: size = old size + 1
+		end -- insert
 
-require 
-not_void:
-new_item /= Void; 
-not_full:
-not is_full; 
+	delete
+			-- Delete the root item.
+		require
+			not_empty: not is_empty
+		deferred
+		ensure
+			size_after_delete: size = old size - 1
+		end -- delete
+feature -- Sizing
+	is_full: BOOLEAN
+			-- Is there no room in this heap for another item?
+		deferred
+		end -- is_full
 
-deferred ensure 
-size_after_insert:
-size = old size + 1; 
-
-end; ——insert 
-delete is 
-——Delete the root item. 
-
-require 
-not_empty:
-not is_empty; 
-
-deferred ensure 
-size_after_delete:
-size = old size — 1; 
-
-end; ——delete 
-feature —-Sizing 
-‘is_full: BOOLEAN is 
-——Is there no room in this heap for another item? 
-
-deferred end —-is_full 
-end —-—class HEAP 
+end -- class HEAP
 ```
 Listing 16.1 The contract for heaps. 
 
@@ -224,7 +221,7 @@ Listing 16.1 The contract for heaps.
 ### 16.2.2 The Array-Based Implementation 
 
 An implementation of heaps must provide two sets of features:
-those that are general to binary trees (since we have inherited the BINARY _TREE contract) 
+those that are general to binary trees (since we have inherited the BINARY_TREE contract) 
 and the ones specific to heaps. 
 
 Since BINARY_SEARCH_TREE_ARRAY is also an array-based implementation of a binary tree, it and HEAP_ARRAY have much in common: 
@@ -256,135 +253,106 @@ creation routines make and make_capacity, and navigation features left and right
 We have set ourselves up to use the same representation as we did in BINARY_SEARCH_TREE_ARRAY, but we can actually improve on it in HEAP_ 
 ARRAY, thanks to the fact that heaps are always complete trees. 
 
-```Eiffel
-deferred class BINARY TREE_ARRAY[ITEM —> COMPARABLE] inherit 
-BINARY_TREE|ITEM]; 
+```python
+deferred class BINARY_TREE_ARRAY_EXAMPLE[ITEM -> COMPARABLE] inherit
+    BINARY_TREE_EXAMPLE[ITEM]
 
-feature {BINARY_TREE_ARRAY} 
+feature {BINARY_TREE_ARRAY_EXAMPLE}
+    items: ARRAY[ITEM]
+    root_index: INTEGER
 
-items: ARRAY[ITEM]; 
+feature {BINARY_TREE_ARRAY_EXAMPLE} -- Creation and initialization
+    -- This is really a creation routine, but it is illegal to declare
+    -- it as such in a deferred class. Fully implemented subclasses
+    -- need to declare "creation make_subtree," and implement left
+    -- and right that use it as a creation routine.
+    make_subtree (the_items: like items; the_root_index: like root_index)
+        -- Make this tree share the array the_items and start at the_root_index.
+    do
+        items := the_items
+        root_index := the_root_index
+    end -- make_subtree
 
-root_index: INTEGER; 
+feature -- Accessing the components
+    root_item: ITEM
+        -- The item at the root.
+    do
+        Result := items.item(root_index)
+    end -- root_item
 
-feature {BINARY_TREE_ARRAY } ——Creation and initialization 
-——This is really a creation routine, but it is illegal to declare ——it as such in a deferred class.
-Fully implemented subclasses ——need to declare “creation make_subtree,” and implement left ——and right that use it as a creation routine. 
-make_subtree (the_items:
-like items;
-the_root_index:
-like root_index) is 
-——Make this tree share the array the_items and start at the_root_index. 
+    is_empty: BOOLEAN
+        -- Is this tree empty?
+    do
+        Result := root_index > items.count or else items.item(root_index) = Void
+    end -- is_empty
 
-do 
-items := the_items; 
+    is_full: BOOLEAN
+        -- Cannot predict jumping out of the array,
+        -- so will have to resize as necessary.
+    do
+        Result := False
+    end -- is_full
 
-root_index := the_root_index; 
+    wipe_out
+        -- Make this tree empty.
+    local
+        void_item: ITEM
+        subtree: like Current
+    do
+    	create void_item.make_empty
 
-end; ——make_subtree 
-feature —— Accessing the components 
-root_item: ITEM is 
-——The item at the root. 
+        subtree := left
+        if not subtree.is_empty then
+            subtree.wipe_out
+        end
 
-do 
-Result := items.item (root_index); 
+        subtree := right
+        if not subtree.is_empty then
+            subtree.wipe_out
+        end
 
-end; ——root_item 
-is_empty: BOOLEAN is 
-——Is this tree empty? 
+        items.put(void_item, root_index)
+    end -- wipe_out
 
-do 
-Result := root_index > items.count 
-or else items.item (root_index) = Void; 
+feature -- Cloning and comparing
+    copy (other: like Current)
+        -- Copy other onto this tree.
+    do
+        if root_index = 1 then
+            -- Chances are that we were called from clone, which had aliased
+            -- our items to other.items. Remake that array, just in case.
+            -- items.make_empty(1, other.items.count)
+        	items.make_empty
+        end
 
-end; ——is_empty 
-is_full: BOOLEAN is 
-——Cannot predict jumping out of the array, 
-——so will have to resize as necessary. 
+        if not is_empty then
+            wipe_out
+        end
 
-do 
-Result := false; 
+        if not other.is_empty then
+            -- Track the same item at the root.
+            items.put(other.root_item, root_index)
 
-end; ——is_ full 
-wipe_out is 
-——Make this tree empty. 
+            -- Clone other's subtrees.
+            left.copy(other.left)
+            right.copy(other.right)
+        end
+    end -- copy
 
-local 
-void_item: ITEM; 
-subtree:
-like Current; 
-do 
-subtree := left; 
-if not swbtree.is_empty then 
-subtree.wipe_out; 
+invariant
+    have_array: items /= Void
+    empty_if_no_item: is_empty = (root_item = Void)
+    root_index_positive: root_index > 0
 
-end; 
-
-subtree := right; 
-if not swbtree.is_empty then 
-subtree.wipe_out; 
-
-end; 
-
-items.put (void_item, root_index); 
-
-end; ——wipe_out 
-feature ——Cloning and comparing 
-copy (other:
-like Current) is 
-——Copy other onto this tree. 
-
-do 
-if root_index = 1 then 
-——Chances are that we were called from clone, which had aliased ——our items to other.items.
-Remake that array, just in case. 
-
-'items.make (1, other.items.count); 
-
-end; 
-
-if not is_empty then 
-wipe_out; 
-
-end; 
-
-if not other.is_empty then 
-——Track the same item at the root. 
-items.put (other.root_item, root_index); 
-
-——Clone other’s subtrees. 
-left.copy (other. left); 
-right.copy (other.right); 
-
-end; 
-end; ——copy 
-invariant 
-have_array:
-items /= Void; 
-empty_if_no_item:
-is_empty = (root_item = Void); 
-root_index_ positive:
-root_index > 0; 
-
-end ——class BINARY_TREE_ARRAY 
+end -- class BINARY_TREE_ARRAY
 ```
 Listing 16.2 Class BINARY_TREE_ARRAY a common ancestor to BINARY_SEARCH_TREE_ARRAY and HEAP_ARRAY
 
-```plantuml
-@startmindmap
-* 1
-** 2
-*** 4
-**** 8
-**** 9
-*** 5
-**** 10
-**** 11
-** 3
-*** 6
-**** 12
-*** 7
-@endmindmap
-```
+
+<img src='./images/fig_16_04.svg' />
+
+[Source](https://edotor.net/?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%3B%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%3B%0A%0A%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx11%20%5Blabel%3D%2211%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx12%20%5Blabel%3D%2212%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx13%20%5Blabel%3D%2213%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx14%20%5Blabel%3D%2214%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx15%20%5Blabel%3D%2215%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%3B%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20-%3E%20idx11%20-%3E%20idx12%20-%3E%20idx13%20-%3E%20idx14%20-%3E%20idx15%20%5Bstyle%3Dinvis%5D%3B%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%3B%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%3B%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%3B%0A%20%20%20%20nodesep%3D0.2%3B%0A%20%20%20%20ranksep%3D0.1%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%3B%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%3B%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%3B%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%3B%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%3B%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%3B%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%3B%0A%20%20%20%20n11%20%5Blabel%3D%2211%22%5D%3B%0A%20%20%20%20n12%20%5Blabel%3D%2212%22%5D%3B%0A%20%20%20%20n13%20%5Blabel%3D%2213%22%2C%20style%3Ddashed%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%3B%0A%20%20%20%20n1%20-%3E%20n3%3B%0A%20%20%20%20n2%20-%3E%20n4%3B%0A%20%20%20%20n2%20-%3E%20n5%3B%0A%20%20%20%20n4%20-%3E%20n8%3B%0A%20%20%20%20n4%20-%3E%20n9%3B%0A%20%20%20%20n5%20-%3E%20n10%3B%0A%20%20%20%20n5%20-%3E%20n11%3B%0A%20%20%20%20n3%20-%3E%20n6%3B%0A%20%20%20%20n3%20-%3E%20n7%3B%0A%20%20%20%20n6%20-%3E%20n12%3B%0A%20%20%20%20n6%20-%3E%20n13%20%5Bstyle%3Dinvis%5D%3B%0A%20%20%20%20n7%20-%3E%20n14%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n7%20-%3E%20n15%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%3B%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx2%20-%3E%20n2%20%5Bstyle%3D%22invis%22%2C%20xlabel%3D%22what%20is%20this%22%20label%3D%222nd%20Level%22%2C%20constraint%3Dfalse%2C%20%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%3B%20%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx4%3B%20n4%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx5%3B%20n5%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx6%3B%20n6%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx8%3B%20n8%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx9%3B%20n9%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx10%3B%20n10%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx11%3B%20n11%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx12%20-%3E%20n12%20%5Blabel%3D%22last%20index%22%2C%20constraint%3Dfalse%2C%20style%3Ddotted%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx13%3B%20n13%20%5Bstyle%3Dinvis%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx14%3B%20n14%20%5Bstyle%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx15%3B%20n15%20%5Bstyle%3Dinvis%5D%7D%0A%20%20%20%20%0A%20%20%20%20%0A%7D%0A)
+
 #### Figure 16.4 The mapping of a 12-item heap onto an internal array. 
 
 
@@ -407,37 +375,45 @@ In the example in Figure 16.5, we would compare the items in positions 13 and 6,
 and exchange them if they are out of order. 
 
 ```Eiffel
-class HEAP_ARRAY[ITEM —> COMPARABLE] inherit 
-HEAP([ITEM] 
-redefine 
-insert, delete 
-end; 
+deferred class HEAP_EXAMPLE [ITEM -> COMPARABLE]
 
-BINARY_TREE_ARRAY{ITEM] 
+inherit
+	BINARY_TREE_EXAMPLE [ITEM]
+	redefine
+		is_equal
+	end
+feature -- Adding, removing, and finding items
+	insert (new_item: ITEM)
+			-- Insert new_item into this heap.
+		require
+			not_void: new_item /= Void
+			not_full: not is_full
+		deferred
+		ensure
+			size_after_insert: size = old size + 1
+		end -- insert
 
-redefine is_full 
-end; 
+	delete
+			-- Delete the root item.
+		require
+			not_empty: not is_empty
+		deferred
+		ensure
+			size_after_delete: size = old size - 1
+		end -- delete
+feature -- Sizing
+	is_full: BOOLEAN
+			-- Is there no room in this heap for another item?
+		deferred
+		end -- is_full
 
-creation make, make_capacity, make_subtree 
-feature {HEAP_ARRAY} 
-
-last_index: INTEGER is 
-——Cannot use size, since that has to work for subtrees too. 
-
-feature —-—Sizing 
-is_full: BOOLEAN is 
-——Is there no room in this heap for another item? 
-
-do 
-——Any subheap is full if the main heap is full. 
-Result := last_index >= items.count; 
-
-end; ——is_full 
+end -- class HEAP
 ```
-Listing 16.3 The redefinition specifications and features last_index and is_full 
-of class HEAP_ARRAY. 
+Listing 16.3 The redefinition specifications and features last_index and is_full of class HEAP_ARRAY. 
 
-##### TODO
+<img src='./images/fig_16_05.svg' />
+
+[Source](https://edotor.net/?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%3B%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%3B%0A%0A%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx11%20%5Blabel%3D%2211%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx12%20%5Blabel%3D%2212%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx13%20%5Blabel%3D%2213%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx14%20%5Blabel%3D%2214%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20idx15%20%5Blabel%3D%2215%22%2C%20shape%3Dplaintext%5D%3B%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%3B%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20-%3E%20idx11%20-%3E%20idx12%20-%3E%20idx13%20-%3E%20idx14%20-%3E%20idx15%20%5Bstyle%3Dinvis%5D%3B%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%3B%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%3B%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%3B%0A%20%20%20%20nodesep%3D0.2%3B%0A%20%20%20%20ranksep%3D0.1%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%3B%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%3B%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%3B%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%3B%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%3B%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%3B%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%3B%0A%20%20%20%20n11%20%5Blabel%3D%2211%22%5D%3B%0A%20%20%20%20n12%20%5Blabel%3D%2212%22%5D%3B%0A%20%20%20%20n13%20%5Blabel%3D%2213%22%2C%20style%3Ddashed%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%3B%0A%20%20%20%20n1%20-%3E%20n3%3B%0A%20%20%20%20n2%20-%3E%20n4%3B%0A%20%20%20%20n2%20-%3E%20n5%3B%0A%20%20%20%20n4%20-%3E%20n8%3B%0A%20%20%20%20n4%20-%3E%20n9%3B%0A%20%20%20%20n5%20-%3E%20n10%3B%0A%20%20%20%20n5%20-%3E%20n11%3B%0A%20%20%20%20n3%20-%3E%20n6%3B%0A%20%20%20%20n3%20-%3E%20n7%3B%0A%20%20%20%20n6%20-%3E%20n12%3B%0A%20%20%20%20n6%20-%3E%20n13%20%5Bstyle%3Ddashed%5D%3B%0A%20%20%20%20n7%20-%3E%20n14%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n7%20-%3E%20n15%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%3B%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx2%20-%3E%20n2%20%5Bstyle%3D%22invis%22%2C%20xlabel%3D%22what%20is%20this%22%20label%3D%222nd%20Level%22%2C%20constraint%3Dfalse%2C%20%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%3B%20%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx4%3B%20n4%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx5%3B%20n5%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx6%3B%20n6%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx8%3B%20n8%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx9%3B%20n9%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx10%3B%20n10%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx11%3B%20n11%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx12%20-%3E%20n12%20%5Blabel%3D%22last%20index%22%2C%20constraint%3Dfalse%2C%20style%3Ddotted%5D%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx13%3B%20n13%20%3B%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx14%3B%20n14%20%5Bstyle%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%3B%20idx15%3B%20n15%20%5Bstyle%3Dinvis%5D%7D%0A%20%20%20%20%0A%20%20%20%20%0A%7D%0A)
 
 #### Figure 16.5 If there is an insertion, the shape of the resulting heap will extend to position last_index+1. 
 
@@ -597,51 +573,42 @@ In other words,
 
 An implementation of insert that uses this technique is provided in Listing 16.4. 
 
-```Eiffel
-insert (new_item: ITEM) is 
-——Insert new_item into this heap. 
-
-local 
-index: INTEGER; 
-parent_index: INTEGER; 
-saved_item: ITEM; 
-
-do 
-——Start at the end. 
-last_index := last_index + 1; 
-items. put (new_item, last_index); 
-
-——Move it up until it runs into a greater parent. 
-from 
-index := last_index; 
-parent_index := index //2; 
-
-invariant 
-item_ge_left_child:
-index*2 <= last_index implies 
-item_ge_right_child:
-index*2+1 <= last_index implies 
-items.item (index) >= items.item (index*2); 
-
-items.item (index) >= items.item (index*2+ 1); 
-
-variant index 
-until 
-parent_index < root_index or else items.item (index) <= items.item (parent_index) 
-
-loop 
-——Swap the item with that of the parent node. 
-saved_item := items.item (index); 
-items.put (items.item (parent_index),
-index); 
-items.put (saved_item, parent_index); 
-
-index := parent_index; 
-parent_index := index // 2; 
-
-end; 
-
-end; ——insert
+```python
+insert (new_item: ITEM)
+    -- Insert new_item into this heap.
+local
+    index: INTEGER
+    parent_index: INTEGER
+    saved_item: ITEM
+do
+    -- Start at the end.
+    last_index := last_index + 1
+    items.put(new_item, last_index)
+    
+    -- Move it up until it runs into a greater parent.
+    from
+        index := last_index
+        parent_index := index // 2
+    invariant
+        item_ge_left_child:
+            index * 2 <= last_index implies 
+                items.item(index) >= items.item(index * 2)
+        item_ge_right_child:
+            index * 2 + 1 <= last_index implies 
+                items.item(index) >= items.item(index * 2 + 1)
+    variant
+        index
+    until
+        parent_index < root_index or else items.item(index) <= items.item(parent_index)
+    loop
+        -- Swap the item with that of the parent node.
+        saved_item := items.item(index)
+        items.put(items.item(parent_index), index)
+        items.put(saved_item, parent_index)
+        index := parent_index
+        parent_index := index // 2
+    end
+end -- insert
 ```
 Listing 16.4 Routine insert of class HEAP_ARRAY. 
 
@@ -812,26 +779,49 @@ In a sorted array, the greatest item belongs in the last position of the array, 
 No problem.
 We do a delete, thus removing the root item from the heap and making the heap overlay only array positions through  n—1. 
 
-##### TODO
+![](./images/fig_16_08_a.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%0A%20%20%20%20n4%20-%3E%20n8%0A%20%20%20%20n4%20-%3E%20n9%0A%20%20%20%20n5%20-%3E%20n10%0A%20%20%20%20n3%20-%3E%20n6%0A%20%20%20%20n3%20-%3E%20n7%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx10%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 
 a. Starting with a 10-item heap, delete and move the deleted item to the newly vacated position 10. 
 
+![](./images/fig_16_08_b.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%0A%20%20%20%20n4%20-%3E%20n8%0A%20%20%20%20n4%20-%3E%20n9%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%0A%20%20%20%20n3%20-%3E%20n7%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx9%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
+
 b. Again delete and move the deleted item to position 9. 
 
+![](./images/fig_16_08_c.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%0A%20%20%20%20n4%20-%3E%20n8%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%0A%20%20%20%20n3%20-%3E%20n7%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx8%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 c. Move the next deleted item to position 8. 
+
+![](./images/fig_16_08_d.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%0A%20%20%20%20n3%20-%3E%20n7%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx7%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 
 d. ... to position 7. 
 
+![](./images/fig_16_08_e.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%20%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx6%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
+
 e. ... to position 6
+
+![](./images/fig_16_08_f.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx5%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 
 f. ... to position 5. 
 
+![](./images/fig_16_08_g.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx4%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 g. ... to position 4. 
 
+![](./images/fig_16_08_h.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%0A%20%20%20%20n2%20-%3E%20n4%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx3%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 h. ... to position 3. 
 
+![](./images/fig_16_08_i.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%0A%20%20%20%20n1%20-%3E%20n3%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n4%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%7B%20n1%20-%3E%20idx2%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 i. ... to position 2. 
 
+![](./images/fig_16_08_j.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%2C%20style%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n1%20-%3E%20n3%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n4%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Dinvis%5D%7D%0A%20%20%20%20%0A%2F%2F%7B%20n1%20-%3E%20idx1%20%5B%20xlabel%3D%22delete%20and%20move%22%2C%20color%3Dblue%2C%20constraint%3Dfalse%2C%20dir%3Dright%20%2C%20arrowhead%3Dnormal%2C%20arrowtail%3Dnormal%20%5D%7D%0A%7D%0A)
 j. The array is fully sorted. 
 
 Figure 16.8 Execution of heap sort on a 10-item array.
@@ -861,15 +851,17 @@ will take up to log 15 (three) swaps (after the former last item is moved to the
 So we put “log 15” next to that node.
 The next delete will vacate the position just to its left, and will take log 14 (still three) swaps in the worst case, so we mark it with a log 14 (Figure 16.9b). 
 
-##### TODO
-
+![](./images/fig_16_09_a.svg)
+[source](https://edotor.net/?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.7%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%22log%2015%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
 a. With a 15-item heap, delete takes log 15 steps. 
 
-##### TODO
+![](./images/fig_16_09_b.svg)
+[source](https://edotor.net/?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.7%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%22log%2014%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%22log%2015%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
 
 b. Log 14 more for the smaller heap, etc. 
 
-##### TODO
+![](./images/fig_16_09_c.svg)
+[source](https://edotor.net/?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.7%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%22log%201%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%22log%202%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%22log%203%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%22log%204%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%22log%205%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%22log%206%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%22log%207%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%22log%208%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%22log%209%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%22log%2010%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%22log%2011%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%22log%2012%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%22log%2013%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%22log%2014%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%22log%2015%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
 
 c. At the end, the tally is sum from i =1 to 15 log i. 
 
@@ -938,27 +930,32 @@ Repeating the process for trees with roots at positions 3-1, we get figures Figu
 So what makes this algorithm faster than just inserting N items?
 We are looping 7 times (the number of nonleaves in the tree), and doing a delete equivalent at each step.
 
-##### TODO
-
+![](./images/fig_16_10_a.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%2Cstyle%3Dinvis%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n1%20-%3E%20n3%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n4%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n9%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bxlabel%3D%22turn%20into%20%5Cn%20a%20heap%22%5D%20%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7D%0A)
 a. Start with the last nonleaf position (position 5). 
 
-##### TODO
+![](./images/fig_16_10_b.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(schramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%2Cstyle%3Dinvis%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n1%20-%3E%20n3%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n4%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%0A%20%20%20%20n4%20-%3E%20n9%20%5Bxlabel%3D%22turn%20into%5Cna%20heap%22%5D%0A%20%20%20%20n5%20-%3E%20n10%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n3%20-%3E%20n6%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n3%20-%3E%20n7%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7D%0A)
 
 b. Tumble that item down and move on to position 4. 
 
-##### TODO
+![](./images/fig_16_10_c.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%2Cstyle%3Dinvis%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%2C%20style%3Dinvis%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n1%20-%3E%20n3%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n4%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n5%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n4%20-%3E%20n8%20%0A%20%20%20%20n4%20-%3E%20n9%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n5%20-%3E%20n10%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n3%20-%3E%20n6%20%0A%20%20%20%20n3%20-%3E%20n7%20%5Bxlabel%3D%22turn%20into%5Cna%20heap%22%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7D%0A)
 
 c. Tumble down and move to position 3. 
 
-##### TODO
+![](./images/fig_16_10_d.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%2Cstyle%3Dinvis%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n1%20-%3E%20n3%20%5Bstyle%3Dinvis%5D%0A%20%20%20%20n2%20-%3E%20n4%20%0A%20%20%20%20n2%20-%3E%20n5%20%5Bxlabel%3D%22turn%20into%5Cna%20heap%22%5D%0A%20%20%20%20n4%20-%3E%20n8%20%0A%20%20%20%20n4%20-%3E%20n9%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n5%20-%3E%20n10%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n3%20-%3E%20n6%20%0A%20%20%20%20n3%20-%3E%20n7%20%5Bxlabel%3D%22a%20heap%22%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7D%0A)
 
 d. Tumble down and move to position 2. 
 
-##### TODO
+![](./images/fig_16_10_e.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%0A%20%20%20%20n1%20-%3E%20n3%20%5Bxlabel%3D%22turn%20into%5Cna%20heap%22%5D%0A%20%20%20%20n2%20-%3E%20n4%20%0A%20%20%20%20n2%20-%3E%20n5%20%5Bxlabel%3D%22a%20heap%22%5D%0A%20%20%20%20n4%20-%3E%20n8%20%0A%20%20%20%20n4%20-%3E%20n9%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n5%20-%3E%20n10%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n3%20-%3E%20n6%20%0A%20%20%20%20n3%20-%3E%20n7%20%5Bxlabel%3D%22a%20heap%22%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7D%0A)
 
 e. Tumble down and move to position 1. 
 
-##### TODO
+![](./images/fig_16_10_f.svg)
+[source](https://edotor.net/?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot?engine=dot#digraph%20TreeArray%20%7B%0A%09%20%20%20%20%2F%2F%20Array%20index%20representation%0A%20%20%20%20subgraph%20cluster_index%20%7B%0A%20%20%20%20%20%20%20%20rankdir%3D%22TB%22%0A%20%20%20%20%20%20%20%20label%3D%22Array%20Index%22%0A%20%20%20%20%20%20%20%20style%3D%22filled%22%0A%20%20%20%20%20%20%20%20node%20%5B%20shape%3Dbox%2C%20width%3D1.5%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20nodes%20(invisible%20except%20for%20label)%0A%20%20%20%20%20%20%20%20idx1%20%5Blabel%3D%221%20%E2%86%92%20(spreakley%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx2%20%5Blabel%3D%222%20%E2%86%92%20(scramoge%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx3%20%5Blabel%3D%223%20%E2%86%92%20(knaptoft%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx4%20%5Blabel%3D%224%20%E2%86%92%20(rigolet%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx5%20%5Blabel%3D%225%20%E2%86%92%20(duddo%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx6%20%5Blabel%3D%226%20%E2%86%92%20(harbottle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx7%20%5Blabel%3D%227%20%E2%86%92%20(aa1st%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx8%20%5Blabel%3D%228%20%E2%86%92%20(flunary%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx9%20%5Blabel%3D%229%20%E2%86%92%20(dattuck%2C...)%22%5D%0A%20%20%20%20%20%20%20%20idx10%20%5Blabel%3D%2210%20%E2%86%92%20(bindle%2C...)%22%5D%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%2F%2F%20Index%20grid%20lines%0A%20%20%20%20%20%20%20%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20rank%3Dsame%0A%09%09%09%0A%20%20%20%20%20%20%20%20%20%20%20%20idx1%20-%3E%20idx2%20-%3E%20idx3%20-%3E%20idx4%20-%3E%20idx5%20-%3E%20idx6%20-%3E%20idx7%20-%3E%20idx8%20-%3E%20idx9%20-%3E%20idx10%20%5Bstyle%3Dinvis%5D%20%2F%2F%20%20%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20%2F%2F%20Graph%20settings%0A%20%20%20%20rankdir%3DTB%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%5D%0A%20%20%20%20edge%20%5Bdir%3Dnone%5D%0A%20%20%20%20nodesep%3D0.4%0A%20%20%20%20ranksep%3D0.1%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20nodes%20and%20connections%0A%20%20%20%20n1%20%5Blabel%3D%221%22%5D%0A%20%20%20%20n2%20%5Blabel%3D%222%22%5D%0A%20%20%20%20n3%20%5Blabel%3D%223%22%5D%0A%20%20%20%20n4%20%5Blabel%3D%224%22%5D%0A%20%20%20%20n5%20%5Blabel%3D%225%22%5D%0A%20%20%20%20n6%20%5Blabel%3D%226%22%5D%0A%20%20%20%20n7%20%5Blabel%3D%227%22%5D%0A%20%20%20%20n8%20%5Blabel%3D%228%22%5D%0A%20%20%20%20n9%20%5Blabel%3D%229%22%5D%0A%20%20%20%20n10%20%5Blabel%3D%2210%22%5D%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Tree%20edges%0A%20%20%20%20n1%20-%3E%20n2%20%0A%20%20%20%20n1%20-%3E%20n3%20%5Bxlabel%3D%22a%20heap%22%5D%0A%20%20%20%20n2%20-%3E%20n4%20%0A%20%20%20%20n2%20-%3E%20n5%20%5Bxlabel%3D%22a%20heap%22%5D%0A%20%20%20%20n4%20-%3E%20n8%20%0A%20%20%20%20n4%20-%3E%20n9%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n5%20-%3E%20n10%20%5Bxlabel%3D%22a%20heap%22%5D%20%0A%20%20%20%20n3%20-%3E%20n6%20%0A%20%20%20%20n3%20-%3E%20n7%20%5Bxlabel%3D%22a%20heap%22%5D%0A%20%20%20%20%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Node%20positioning%20with%20invisible%20edges%0A%20%20%20%20%7Brank%3Dsame%20idx1%20-%3E%20n1%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx2%20-%3E%20n2%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx3%20-%3E%20n3%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx4%20-%3E%20n4%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx5%20-%3E%20n5%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx6%20-%3E%20n6%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx7%20-%3E%20n7%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx8%20-%3E%20n8%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx9%20-%3E%20n9%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%7Brank%3Dsame%20idx10%20-%3E%20n10%20%5Bconstraint%3Dfalse%2C%20style%3Ddotted%5D%7D%0A%20%20%20%20%0A%7D%0A)
 
 f. Tumble down. The whole tree is now a heap. 
 
@@ -989,10 +986,13 @@ or
 
 2^3 X 0 + 2 ^ 2 X 1 + 2 ^ 1 x 2 + 2 ^ 0 X 3
 
-##### TODO
+![](./images/fig_16_11_a.svg)
+[source](https://edotor.net/?engine=dot?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
 a. top-down 
 
-##### TODO
+![](./images/fig_16_11_b.svg)
+[source](https://edotor.net/?engine=dot?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.3%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%223%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%222%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%221%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%220%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
+
 b. bottom-up 
 
 ### Figure 16.11 The number of swaps needed to build a heap top-down (start empty and insert all items) and bottom-up. 
@@ -1013,20 +1013,22 @@ and so on.
 
 So in general, for a full tree of size N, the sum is approximately 
 
-##### TODO
+$$\frac{N}{2^1} \times 0 + \frac{N}{2^2} \times 1 + \frac{N}{2^3} \times 2 + \cdots + \frac{N}{2^{h-1}} \times (h-2) + \frac{N}{2^h} \times (h-1)$$
+
+
 
 where h is the height (h = log N). 
-If we factor out N, we get 
+If we factor out $N$, we get 
 
-##### TODO
+$$N\left(\frac{0}{2^1} + \frac{1}{2^2} + \frac{2}{2^3} + \cdots + \frac{h-2}{2^{h-1}} + \frac{h-1}{2^h}\right)$$
 
-So if the sum in parentheses is less than O(log N),
+So if the sum in parentheses is less than $O(log N)$,
 then bottom-up heap building has better time complexity than top-down heap building. 
 
 Let us take a brief mathematical detour, to establish a fact that turns out to be quite a useful tool for software writers.
 Not infrequently, one runs into the sum 
 
-##### TODO
+$$\frac{1}{2} + \frac{1}{2^2} + \frac{1}{2^3} + \frac{1}{2^4} + \cdots$$
 
 To what does that add up?
 There is an infinite number of terms, but they keep getting smaller and smaller, so the answer may not be “infinity.” 
@@ -1046,7 +1048,7 @@ The more of the terms of the sum you add, the closer you will get to a full 1,
 
 but you will never get exactly 1, and you will certainly never go over it.
 
-##### TODO 
+$$\frac{1}{2} + \frac{1}{2^2} + \frac{1}{2^3} + \frac{1}{2^4} + \cdots < 1 $$
 (16.2) 
 
 So (You may recall that we got approximately the same result by counting squares in the linked list version of binary search, Figure 14.2.) 
@@ -1059,28 +1061,31 @@ The tricky difference lies in the fact that the numerators in Eq. (16.2) are all
 
 [1]: No, I am not a pessimist. Just read on. 
 
-Let us rewrite the sum in Eq. (16.1) a little, by splitting up the terms to get a sum where every numerator is 1: Replace “&” with “# +%,” “%” with “Ak +4 +4,” 
+Let us rewrite the sum in Eq. (16.1) a little, by splitting up the terms to get a sum where every numerator is 1: Replace $\frac{2}{2^3}$ with “$\frac{1}{2^3} + \frac{1}{2^3}$,” “$\frac{3}{2^4}$” with “$\frac{1}{2^4} + \frac{1}{2^4} + \frac{1}{2^4}$,” 
 and so on. 
 
-##### TODO
+$$\frac{1}{2^2} + \frac{1}{2^3} + \frac{1}{2^3} + \frac{1}{2^4} + \frac{1}{2^4} + \frac{1}{2^4} + \cdots$$
 
-[The sum in Kq. (16.1) is finite while this one is infinite, so if this sum has a limit, the one we seek will be bound by it too.] Do you see the sum from Eq. (16.2) lurking in it? 
+[The sum in Eq. (16.1) is finite while this one is infinite, so if this sum has a limit, the one we seek will be bound by it too.] Do you see the sum from Eq. (16.2) lurking in it? 
 
 Let us rewrite it two dimensionally, putting the terms with the same power 
 of 2 under each other instead of consecutively: 
 
-##### TODO
+$$\frac{1}{2^2} + \frac{1}{2^3} + \frac{1}{2^4} + \frac{1}{2^5} + \cdots$$
+$$+ \frac{1}{2^3} + \frac{1}{2^4} + \frac{1}{2^5} + \cdots$$
+$$+ \frac{1}{2^4} + \frac{1}{2^5} + \cdots$$
+$$+ \frac{1}{2^5} + \cdots$$
 
 Well, well, well.
 Not only is Eq. (16.2) lurking in this sum, but it appears in every row!
-The sum of row 1 is < 3 [subtracting 3 from both sides of Eq. (16.2)]; 
-the second row adds up to almost #;
-the third approaches 3;
+The sum of row 1 is $< \frac{1}{2}$ [subtracting $\frac{1}{2}$ from both sides of Eq. (16.2)]; 
+the second row adds up to almost $\frac{1}{2^2}$;
+the third approaches $\frac{1}{2^3}$;
 and so on. 
 
 If we add up the sums of the rows, we get 
 
-##### TODO
+$$\frac{1}{2} + \frac{1}{2^2} + \frac{1}{2^3} + \frac{1}{2^4} $$
 
 in which Eq. (16.2) does not have to lurk. 
 
@@ -1092,20 +1097,20 @@ Thus, the time complexity of the bottom-up heap building algorithm is O(N).
 
 Heap sort consists of two parts:
 building the heap and sorting.
-The time it takes to do a heap sort is the sum of the times it takes to do each part, which is O(N + N log N),
-which is O(N log N). 
+The time it takes to do a heap sort is the sum of the times it takes to do each part, which is $O(N + N log N)$,
+which is $O(N log N)$. 
 
 In Chapter 13, we looked at two other algorithms that can perform with equally low time complexity:
-merge sort, which is consistently O(N log N) 
-but has a rather high constant, and quick sort, which tends to be a quicker OWN log N) but can get as bad as O(N”). 
+merge sort, which is consistently $O(N log N)$ 
+but has a rather high constant, and quick sort, which tends to be a quicker $O(N log N)$ but can get as bad as $O(N^2)$. 
 
-Heap sort is always O(N log N),
+Heap sort is always $O(N log N)$,
 so its worst case is much better than quick sort’s worst case.
 In the average case, though, quick sort can be coded to be a little faster. 
 
 In the worst case, heap sort is the same as merge sort.
 On the average, 
-heap sort is still O(N log N),
+heap sort is still $O(N log N)$,
 but the constant gets lower.
 Merge sort keeps the same constant in the average case as in the worst case, so it tends to be slower than heap sort. 
 
@@ -1114,24 +1119,24 @@ Merge sort keeps the same constant in the average case as in the worst case, so 
 A balanced tree is one where for every node, the difference between the heights of its subtrees is no greater than 1.
 A complete tree is one whose breadth-first traversal has no holes (thus, a complete tree is balanced).
 A heap is a complete tree that obeys priority queue ordering: For every subtree, the root item is “>=” the root items of its children.
-This chapter presented an O(N) algorithm for building a heap, and O(log N) algorithms for building a heap, and inserting and deleting items. 
+This chapter presented an $O(N)$ algorithm for building a heap, and $O(log N)$ algorithms for building a heap, and inserting and deleting items. 
 
 Heap sort overlays a breadth-first heap structure over a list, and works by removing the greatest item from the heap’s root (the leftmost item of the list) 
 and exchanging it with the item in the last breadth-first position of the old heap (the rightmost item of the unsorted region).
 It is similar to selection sort, 
 except the heap is used to select the greatest item.
-Heap sort’s performance is O(N log N),
+Heap sort’s performance is $O(N log N)$,
 and on the average it tends to perform better than merge sort but not quite as well as quick sort. 
 
 # Exercises 
 
-1. Write feature delete for class HEAP_ARRAY. 
-2. Complete class HEAP_ARRAY. 
+1. Write feature delete for class `HEAP_ARRAY`. 
+2. Complete class `HEAP_ARRAY`. 
 3. What is the time complexity of insert? 
-4. Show that the time complexity of delete is O(log N). 
+4. Show that the time complexity of delete is $O(log N)$. 
 5. Design and implement priority queues: 
-    1. Write deferred class PRIORITY_QUEUE. 
-    2. Write class PRIORITY_QUEUE_HEAP using HEAP_ARRAY. 
-6. Make BINARY SEARCH_TREE_ARRAY take advantage of BINARY_TREE_ARRAY. 
+    1. Write deferred class `PRIORITY_QUEUE`. 
+    2. Write class `PRIORITY_QUEUE_HEAP` using `HEAP_ARRAY`. 
+6. Make `BINARY_SEARCH_TREE_ARRAY` take advantage of `BINARY_TREE_ARRAY`. 
 7. How well does heap sort perform on a mostly sorted array? 
-8. Write class HEAPSORTABLE_LIST_ARRAY. 
+8. Write class `HEAPSORTABLE_LIST_ARRAY`. 
