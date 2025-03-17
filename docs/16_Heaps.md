@@ -7,32 +7,31 @@ Let us see how that can be done with linear object structures, and then see how 
 
 ## 16.1 Priority Queues 
 
-An interesting variation of a queue is a priority queue.
+An interesting variation of a queue is a **priority queue**.
 It is similar to the queues we studied in Chapter 9, but with one distinction: Items in it are conceptually sorted by their “greatness,” so that if an item is at the front of the queue, no item behind it is “>” it. 
 
-I say “conceptually sorted” because how a priority queue is implemented is only the implementer’s business.
+I say “conceptually sorted” because *how* a priority queue is implemented is only the implementer’s business.
 It may actually be a sorted linear structure inside, but it does not have to be.
-All it needs to do is make sure that front results in the greatest item (or one of the greatest items if there are equal items in the queue). 
+All it needs to do is make sure that *front* results in the greatest item (or one of the greatest items if there are equal items in the queue). 
 
 ### 16.1.1 Linear Versions 
 
 If we did implement the queue as a linear structure, we would not need to use any of the sort algorithms to keep it in sorted order.
-We could simply have enqueue start at the end of the queue and move the new item forward until it is behind an item that is “>=” the new item. 
+We could simply have *enqueue* start at the end of the queue and move the new item forward until it is behind an item that is “>=” the new item. 
 
 For example, suppose you are in a martial arts class, and the instructor is reviewing the techniques of individual students today.
 The instructor reviews  students in the order of their rank, so when you arrive, everybody who got there before you is already lined up by rank.
 To enqueue yourself, you move through the line until you are behind a person of your own or higher rank. 
 
-This is an O(N) operation, which is better than the O(N log N) a real sort would require. (Well, insertion sort would also be O() in this case, because it would be using essentially the same algorithm.) 
+This is an $O(N)$ operation, which is better than the $O(NogN)$ a real sort would require. (Well, insertion sort would also be $O(N)$ in this case, because it would be using essentially the same algorithm.) 
 
-Alternatively, we could let enqueue be O(1) by just adding the new item to the end, and letting front and dequeue search the queue for the greatest item. 
-This would also be O(N),
-though with a higher average-case constant, since to determine the highest item in a list that is sorted only chronologically, it is always necessary to scan the entire list. (In the worst case, the enqueue in the keep-it-sorted method will also scan the whole queue.)
+Alternatively, we could let *enqueue* be $O(1)$ by just adding the new item to the end, and letting *front* and *dequeue* search the queue for the greatest item. 
+This would also be $O(N)$,
+though with a higher average-case constant, since to determine the highest item in a list that is sorted only chronologically, it is always necessary to scan the entire list. (In the worst case, the *enqueue* in the keep-it-sorted method will also scan the whole queue.)
 In our example, the instructor would just scan the queue to find the frontmost student of the highest rank still in the queue. 
 
-However, we do not have to settle for an O(N) implementation.
-Now that we 
-know about trees, we have a way to do it in O(log N) time. 
+However, we do not have to settle for an $O(N)$ implementation.
+Now that we know about trees, we have a way to do it in $O(log N)$ time. 
 
 ### 16.1.2 A Tree Version 
 
@@ -43,7 +42,7 @@ So the two front people look at each other,
 and the one with higher rank steps forward and stands between the two lines, 
 ready for dequeuing.
 Everybody behind the newly vacated spot then moves up a step.
-The enqueue operation would pick a line and do as before, but this time the line is only half as long (if the lines are balanced). 
+The *enqueue* operation would pick a line and do as before, but this time the line is only half as long (if the lines are balanced). 
 
 Let us proceed with this optimization.
 Suppose the two half-lines were split into two quarter-lines.
@@ -53,14 +52,15 @@ Now we have the two highest ranking students up front, and we have already cover
 The enqueue routine now only has about zN positions to traverse. 
 
 If we continue this process, we wind up with a binary tree, with its root being the front of the queue.
-The tree is sorted, but not the way binary search trees in Chapter 15 were.
+The tree is sorted, but not the way binary search trees in [Chapter 15](./15_Binary_Search_Trees.md) were.
 The ordering is now “the root item of a tree is ‘>=’ 
 the root items of both subtrees.” A tree like that is shown in Figure 16.1.
-With this arrangement, front is O(1),
+With this arrangement, *front* is $O(1)$,
 since the front item is right there at the root. 
 
 ```plantuml
 @startmindmap
+top to bottom direction
 * (Black Belt, Morton)
 ** (Black Belt, Apodaca)
 *** (Bed Belt, Wu)
@@ -76,11 +76,11 @@ since the front item is right there at the root.
 #### Figure 16.1 A priority queue. The belts are ranked as follows: White < Gold < Green < Blue < Red < Black. 
 
 An enqueue starts by adding the new item into an empty subtree, and then moving it up (trading places with its parent) until its parent is “>=” it.
-Thus, the time complexity of insert is the height of the tree, which is O(log N) if the tree is balanced. 
+Thus, the time complexity of insert is the height of the tree, which is $O(\log N)$ if the tree is balanced. 
 
 The dequeue takes the front item.
 This creates a vacancy at the root, which is filled by promoting the greater of the root items of the two subtrees, and the process is repeated recursively.
-Its time complexity is also O(height) which is O(log NV) if the tree is balanced. 
+Its time complexity is also $O(height)$ which is $O(\log N)$ if the tree is balanced. 
 
 Fortunately, unlike the case with binary search trees, there is a way to keep priority queues balanced.
 We need to be clever about how enqueuing and dequeuing work. 
@@ -100,6 +100,7 @@ For other sizes, we need balanced trees that are a little less restrictive in fo
 
 ```plantuml
 @startmindmap
+top to bottom direction
 * (Black Belt, Morton)
 ** (Black Belt, Apodaca)
 *** (Bed Belt, Wu)
@@ -133,6 +134,8 @@ Implementations of linear and heap-based priority queues are too straightforward
 
 ```plantuml
 @startmindmap
+top to bottom direction
+
 * (Black Belt, Morton)
 ** (Black Belt, Apodaca)
 *** (Bed Belt, Wu)
@@ -433,16 +436,16 @@ This process is illustrated in Figure 16.6.
 @startuml
 top to bottom direction
 
-object "(Black Belt, Morton)" as morton
-object "(Red Belt, Apodaca)" as apodaca
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
-object "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Black Belt, Morton)" as morton
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
+rectangle "(Blue Belt, Zalewski)" as zalewski
 
 morton -down-> apodaca
 apodaca -down-> wu
@@ -462,16 +465,16 @@ a. Into this heap, (Black Belt, Baker) will be added.
 @startuml
 top to bottom direction
 
-object "(Black Belt, Morton)" as morton
-object "(Red Belt, Apodaca)" as apodaca
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
-object "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Black Belt, Morton)" as morton
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
+rectangle "(Blue Belt, Zalewski)" as zalewski
 
 
 morton -down-> apodaca
@@ -484,7 +487,7 @@ morton -down-> young
 young -down-> odegaard
 young -down-> morris
 
-object "(Black Belt, Baker)" as baker
+rectangle "(Black Belt, Baker)" as baker
 zalewski -down-> baker
 baker ..> zalewski : swap
 @enduml
@@ -495,18 +498,18 @@ b. Place the new item in the next available complete tree slot. It is “>” it
 @startuml
 top to bottom direction
 
-object "(Black Belt, Morton)" as morton
-object "(Red Belt, Apodaca)" as apodaca
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
-object "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Black Belt, Morton)" as morton
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
+rectangle "(Blue Belt, Zalewski)" as zalewski
 
-object "(Black Belt, Baker)" as baker
+rectangle "(Black Belt, Baker)" as baker
 
 morton -down-> apodaca
 apodaca -down-> wu
@@ -529,18 +532,18 @@ c. It is “>” its new parent’s item, so they will have to be exchanged.
 @startuml
 top to bottom direction
 
-object "(Black Belt, Morton)" as morton
-object "(Black Belt, Baker)" as baker
+rectangle "(Black Belt, Morton)" as morton
+rectangle "(Black Belt, Baker)" as baker
 
-object "(Red Belt, Apodaca)" as apodaca
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
-object "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
+rectangle "(Blue Belt, Zalewski)" as zalewski
 
 
 morton -down-> baker
@@ -623,24 +626,24 @@ If it is “<” at least one of its children, then it must be swapped.
 @startuml
 top to bottom direction
 
-object "(Black Belt, Morton)" as morton
-object "(Black Belt, Baker)" as baker
+rectangle "(Black Belt, Morton)" as morton
+rectangle "(Black Belt, Baker)" as baker
 
-object "(Red Belt, Apodaca)" as apodaca
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Green Belt, Heldt)" as heldt
 
-object "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Blue Belt, Zalewski)" as zalewski
 
 note to right of zalewski
   Delete
 end note
 
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
 
 
 
@@ -664,16 +667,16 @@ a. The last-indexed item will be moved to the root.
 @startuml
 top to bottom direction
 
-object "(Blue Belt, Zalewski)" as zalewski #darkgray
-object "(Black Belt, Baker)" as baker
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Red Belt, Apodaca)" as apodaca
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
+rectangle "(Blue Belt, Zalewski)" as zalewski #darkgray
+rectangle "(Black Belt, Baker)" as baker
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
 
 
 zalewski --> baker
@@ -698,16 +701,16 @@ b. It is “<” at least one of its children, so it must be exchanged with the 
 top to bottom direction
 
 
-object "(Black Belt, Baker)" as baker
-object "(Blue Belt, Zalewski)" as zalewski
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Red Belt, Apodaca)" as apodaca
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
+rectangle "(Black Belt, Baker)" as baker
+rectangle "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
 
 
 baker --> zalewski
@@ -731,16 +734,16 @@ c. It is “<” at least one of its children, so it must be exchanged with the 
 top to bottom direction
 
 
-object "(Black Belt, Baker)" as baker
-object "(Red Belt, Apodaca)" as apodaca
-object "(Gren Belt, Wu)" as wu
-object "(Gold Belt, Melendez)" as melendez
-object "(White Belt, Carter)" as carter
-object "(Blue Belt, Zalewski)" as zalewski
-object "(Green Belt, Heldt)" as heldt
-object "(Red Belt, Young)" as young
-object "(Blue Belt, Odegaard)" as odegaard
-object "(Gold Belt, Morris)" as morris
+rectangle "(Black Belt, Baker)" as baker
+rectangle "(Red Belt, Apodaca)" as apodaca
+rectangle "(Gren Belt, Wu)" as wu
+rectangle "(Gold Belt, Melendez)" as melendez
+rectangle "(White Belt, Carter)" as carter
+rectangle "(Blue Belt, Zalewski)" as zalewski
+rectangle "(Green Belt, Heldt)" as heldt
+rectangle "(Red Belt, Young)" as young
+rectangle "(Blue Belt, Odegaard)" as odegaard
+rectangle "(Gold Belt, Morris)" as morris
 
 
 baker --> apodaca
@@ -847,48 +850,140 @@ This time, rather than leaving little square bread crumbs at every step, we will
 
 Figure 16.9a shows a full tree of height 4 (15 items).
 The delete that vacates the last position of the tree (the rightmost position in the bottom level) 
-will take up to log 15 (three) swaps (after the former last item is moved to the root).
-So we put “log 15” next to that node.
-The next delete will vacate the position just to its left, and will take log 14 (still three) swaps in the worst case, so we mark it with a log 14 (Figure 16.9b). 
+will take up to $\log 15$ (three) swaps (after the former last item is moved to the root).
+So we put $\log 15$ next to that node.
+The next delete will vacate the position just to its left, and will take $\log 14$ (still three) swaps in the worst case, so we mark it with a $\log 14$ (Figure 16.9b). 
 
-![](./images/fig_16_09_a.svg)
-[source](https://edotor.net/?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.7%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%22log%2015%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
-a. With a 15-item heap, delete takes log 15 steps. 
+```plantuml
+@startuml
+circle n1 as " "
+circle n2 as " "
+circle n3 as " "
+circle n4 as " "
+circle n5 as " "
+circle n6 as " "
+circle n7 as " "
+circle n8 as " "
+circle n9 as " "
+circle n10 as " "
+circle n11 as " "
+circle n12 as " "
+circle n13 as " "
+circle n14 as " "
+circle n15 as "log 15"
 
-![](./images/fig_16_09_b.svg)
-[source](https://edotor.net/?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.7%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%22%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%22log%2014%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%22log%2015%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
+n1 -- n2
+n1 -- n3
+n2 -- n4
+n2 -- n5
+n3 -- n6
+n3 -- n7
+n4 -- n8
+n4 -- n9
+n5 -- n10
+n5 -- n11
+n6 -- n12
+n6 -- n13
+n7 -- n14
+n7 -- n15
+@enduml
+```
+a. With a 15-item heap, delete takes $\log 15$ steps. 
 
-b. Log 14 more for the smaller heap, etc. 
+```plantuml
+@startuml
+circle n1 as " "
+circle n2 as " "
+circle n3 as " "
+circle n4 as " "
+circle n5 as " "
+circle n6 as " "
+circle n7 as " "
+circle n8 as " "
+circle n9 as " "
+circle n10 as " "
+circle n11 as " "
+circle n12 as " "
+circle n13 as " "
+circle n14 as "log 14"
+circle n15 as "log 15"
 
-![](./images/fig_16_09_c.svg)
-[source](https://edotor.net/?engine=dot#digraph%20BinaryTree%20%7B%0A%20%20%20%20%2F%2F%20Node%20appearance%20settings%0A%20%20%20%20node%20%5Bshape%3Dcircle%2C%20fixedsize%3Dtrue%2C%20width%3D0.7%2C%20style%3Dfilled%2C%20fillcolor%3Dwhite%2C%20color%3Dblack%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Edge%20appearance%0A%20%20%20%20edge%20%5Barrowhead%3Dnone%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20The%20nodes%20in%20the%20tree%20(using%20level-order%20numbering)%0A%20%20%20%201%20%5Blabel%3D%22log%201%22%5D%3B%0A%20%20%20%202%20%5Blabel%3D%22log%202%22%5D%3B%0A%20%20%20%203%20%5Blabel%3D%22log%203%22%5D%3B%0A%20%20%20%204%20%5Blabel%3D%22log%204%22%5D%3B%0A%20%20%20%205%20%5Blabel%3D%22log%205%22%5D%3B%0A%20%20%20%206%20%5Blabel%3D%22log%206%22%5D%3B%0A%20%20%20%207%20%5Blabel%3D%22log%207%22%5D%3B%0A%20%20%20%208%20%5Blabel%3D%22log%208%22%5D%3B%0A%20%20%20%209%20%5Blabel%3D%22log%209%22%5D%3B%0A%20%20%20%2010%20%5Blabel%3D%22log%2010%22%5D%3B%0A%20%20%20%2011%20%5Blabel%3D%22log%2011%22%5D%3B%0A%20%20%20%2012%20%5Blabel%3D%22log%2012%22%5D%3B%0A%20%20%20%2013%20%5Blabel%3D%22log%2013%22%5D%3B%0A%20%20%20%2014%20%5Blabel%3D%22log%2014%22%5D%3B%0A%20%20%20%2015%20%5Blabel%3D%22log%2015%22%5D%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Define%20the%20edges%20connecting%20the%20nodes%0A%20%20%20%201%20-%3E%202%3B%0A%20%20%20%201%20-%3E%203%3B%0A%20%20%20%202%20-%3E%204%3B%0A%20%20%20%202%20-%3E%205%3B%0A%20%20%20%203%20-%3E%206%3B%0A%20%20%20%203%20-%3E%207%3B%0A%20%20%20%204%20-%3E%208%3B%0A%20%20%20%204%20-%3E%209%3B%0A%20%20%20%205%20-%3E%2010%3B%0A%20%20%20%205%20-%3E%2011%3B%0A%20%20%20%206%20-%3E%2012%3B%0A%20%20%20%206%20-%3E%2013%3B%0A%20%20%20%207%20-%3E%2014%3B%0A%20%20%20%207%20-%3E%2015%3B%0A%20%20%20%20%0A%20%20%20%20%2F%2F%20Graph%20layout%20settings%0A%20%20%20%20graph%20%5Bordering%3Dout%2C%20ranksep%3D0.5%2C%20nodesep%3D0.3%5D%3B%0A%7D)
+n1 -- n2
+n1 -- n3
+n2 -- n4
+n2 -- n5
+n3 -- n6
+n3 -- n7
+n4 -- n8
+n4 -- n9
+n5 -- n10
+n5 -- n11
+n6 -- n12
+n6 -- n13
+n7 -- n14
+n7 -- n15
+@enduml
+```
+b. $\log 14$ more for the smaller heap, etc. 
 
-c. At the end, the tally is sum from i =1 to 15 log i. 
+```plantuml
+@startuml
+circle n1 as "log 1"
+circle n2 as "log 2"
+circle n3 as "log 3"
+circle n4 as "log 4"
+circle n5 as "log 5"
+circle n6 as "log 6"
+circle n7 as "log 7"
+circle n8 as "log 8"
+circle n9 as "log 9"
+circle n10 as "log 10"
+circle n11 as "log 11"
+circle n12 as "log 12"
+circle n13 as "log 13"
+circle n14 as "log 14"
+circle n15 as "log 15"
+
+n1 -- n2
+n1 -- n3
+n2 -- n4
+n2 -- n5
+n3 -- n6
+n3 -- n7
+n4 -- n8
+n4 -- n9
+n5 -- n10
+n5 -- n11
+n6 -- n12
+n6 -- n13
+n7 -- n14
+n7 -- n15
+@enduml
+```
+c. At the end, the tally is $\sum_{i=1}^15 \log i$. 
 
 #### Figure 16.9 Counting the number of swaps performed by the sorting stage of heap sort. 
 
 This process continues until there is only one item left, which takes no 
-effort at all (log 1 = 0),
+effort at all $(\log 1 = 0)$,
 resulting in Figure 16.9c. 
 
-So, if the heap is of size N, the first deletion will take log N steps.
-The remaining heap will be of size N — 1, so the next delete will take log(N — 1) 
+So, if the heap is of size N, the first deletion will take $\log N$ steps.
+The remaining heap will be of size $N — 1$, so the next delete will take $\log(N — 1)$ 
 steps.
-The third deletion will take log(N — 2) and so on, until we get down to the one-item heap, which takes log 1 steps (i.e., zero).
+The third deletion will take $\log(N — 2)$ and so on, until we get down to the one-item heap, which takes $\log 1$ steps (i.e., zero).
 So we need to add all of these up: 
 
-```
-log N + log(N — 1) + ... +  log 2 + log 1 
-```
+
+$$ \log N + \log(N — 1) + \cdot +  \log 2 + \log 1 $$
 
 or, more compactly, 
 
-```
-sum from 1 =1 to N log i i=l 
-```
+
+$$\sum_{i=1}^{N} \log i$$
 
 Since the time when we began figuring out algorithm complexities back in Section 6.5, we have used intuitive techniques to count up the steps.
-Unfortunately, this case is one where intuition hits a dead end, and rigorous mathematics is needed to determine that this sum is O(N log N). (For a proof, see Herbert S.Wilf’s Algorithms and Complexity [12, Eqs. 1.1.1—1.1.7].) 
+Unfortunately, this case is one where intuition hits a dead end, and rigorous mathematics is needed to determine that this sum is $O(N \log N)$. (For a proof, see Herbert S.Wilf’s Algorithms and Complexity [12, Eqs. 1.1.1—1.1.7].) 
 
 ### 16.3.1 Building the Heap 
 
@@ -901,15 +996,13 @@ Start with a heap of size 1, then insert the element from position 2 into it, th
 
 The time complexity of this operation is 
 
-```
-O(log 1+ log 2+ ---+ log(N — 1) + log N) 
-```
+$$ O(\log 1+ \log 2+ \cdots + \log(N — 1) + \log N) $$
 
-which is the same as it was for the sorting portion of the algorithm: O(N log N). 
-With two consecutive O(N log N) parts, the total time complexity of heap sort is ON log N). 
+which is the same as it was for the sorting portion of the algorithm: $O(N \log N)$. 
+With two consecutive $O(N \log N)$ parts, the total time complexity of heap sort is $O(N \log N)$. 
 
 But there is a faster way to turn the array into a heap.
-The algorithm is based on the observation that the reason delete can work in O(log N) time is that the tumbling-down process starts with a structure that is almost a heap already: Both of its subtrees are heaps, we are just not sure if the new root item is in the right place (such a structure is called a “semiheap”).
+The algorithm is based on the observation that the reason delete can work in $O( \log N)$ time is that the tumbling-down process starts with a structure that is almost a heap already: Both of its subtrees are heaps, we are just not sure if the new root item is in the right place (such a structure is called a “semiheap”).
 Thus, when we tumble it down to a spot where it is “>=” both of its children, we know that it is “>=” all items in both subtrees. 
 
 The build-the-heap algorithm works by building little heaps at the bottom of the tree, and then it takes advantage of the fact that two sibling heaps plus their parent form a semiheap.
@@ -962,12 +1055,12 @@ f. Tumble down. The whole tree is now a heap.
 #### Figure 16.10 Building a heap out of an unsorted tree.
 
 
-Doesn't that add up to O(N log N)?
+Doesn't that add up to $O(N \log N)$ ?
 Perhaps, but we cannot take that for granted, for the same reason we could not in the analysis of the sorting portion of heap sort: The tree height is not fixed at N. 
 
 Figure 16.11a shows the number of swaps needed to build a 15-node heap by starting with an empty heap and inserting 15 items (the top-down approach).
 The number at each node is the maximum number of swaps needed to insert an item into a heap so that it extends to that position.
-This illustration is the same as Figure 16.9c, except the “log i” have been replaced with their numeric values. 
+This illustration is the same as Figure 16.9c, except the $\log i$ have been replaced with their numeric values. 
 
 The bottom-up approach gives us a different picture.
 It takes zero swaps to turn the bottom row (level 4) into eight heaps, because being leaves, all of those nodes are  heaps already.
@@ -1017,12 +1110,12 @@ $$\frac{N}{2^1} \times 0 + \frac{N}{2^2} \times 1 + \frac{N}{2^3} \times 2 + \cd
 
 
 
-where h is the height (h = log N). 
+where h is the height $(h = \log N)$. 
 If we factor out $N$, we get 
 
 $$N\left(\frac{0}{2^1} + \frac{1}{2^2} + \frac{2}{2^3} + \cdots + \frac{h-2}{2^{h-1}} + \frac{h-1}{2^h}\right)$$
 
-So if the sum in parentheses is less than $O(log N)$,
+So if the sum in parentheses is less than $O(\log N)$,
 then bottom-up heap building has better time complexity than top-down heap building. 
 
 Let us take a brief mathematical detour, to establish a fact that turns out to be quite a useful tool for software writers.
@@ -1093,24 +1186,24 @@ So the sum in Kq. (16.1) will be a number between 0 (if the tree is of size 1)
 and 1 (if the tree is infinite in size).
 Thus, the time complexity of the bottom-up heap building algorithm is O(N). 
 
-### 16.3.2 Heap Sort vs. Other O(N log N) Sorts 
+### 16.3.2 Heap Sort vs. Other $O(N \log N)$ Sorts 
 
 Heap sort consists of two parts:
 building the heap and sorting.
-The time it takes to do a heap sort is the sum of the times it takes to do each part, which is $O(N + N log N)$,
-which is $O(N log N)$. 
+The time it takes to do a heap sort is the sum of the times it takes to do each part, which is $O(N + N \log N)$,
+which is $O(N \log N)$. 
 
 In Chapter 13, we looked at two other algorithms that can perform with equally low time complexity:
-merge sort, which is consistently $O(N log N)$ 
-but has a rather high constant, and quick sort, which tends to be a quicker $O(N log N)$ but can get as bad as $O(N^2)$. 
+merge sort, which is consistently $O(N \log N)$ 
+but has a rather high constant, and quick sort, which tends to be a quicker $O(N \log N)$ but can get as bad as $O(N^2)$. 
 
-Heap sort is always $O(N log N)$,
+Heap sort is always $O(N \log N)$,
 so its worst case is much better than quick sort’s worst case.
 In the average case, though, quick sort can be coded to be a little faster. 
 
 In the worst case, heap sort is the same as merge sort.
 On the average, 
-heap sort is still $O(N log N)$,
+heap sort is still $O(N \log N)$,
 but the constant gets lower.
 Merge sort keeps the same constant in the average case as in the worst case, so it tends to be slower than heap sort. 
 
@@ -1119,13 +1212,13 @@ Merge sort keeps the same constant in the average case as in the worst case, so 
 A balanced tree is one where for every node, the difference between the heights of its subtrees is no greater than 1.
 A complete tree is one whose breadth-first traversal has no holes (thus, a complete tree is balanced).
 A heap is a complete tree that obeys priority queue ordering: For every subtree, the root item is “>=” the root items of its children.
-This chapter presented an $O(N)$ algorithm for building a heap, and $O(log N)$ algorithms for building a heap, and inserting and deleting items. 
+This chapter presented an $O(N)$ algorithm for building a heap, and $O(\log N)$ algorithms for building a heap, and inserting and deleting items. 
 
 Heap sort overlays a breadth-first heap structure over a list, and works by removing the greatest item from the heap’s root (the leftmost item of the list) 
 and exchanging it with the item in the last breadth-first position of the old heap (the rightmost item of the unsorted region).
 It is similar to selection sort, 
 except the heap is used to select the greatest item.
-Heap sort’s performance is $O(N log N)$,
+Heap sort’s performance is $O(N \log N)$,
 and on the average it tends to perform better than merge sort but not quite as well as quick sort. 
 
 # Exercises 
@@ -1133,7 +1226,7 @@ and on the average it tends to perform better than merge sort but not quite as w
 1. Write feature delete for class `HEAP_ARRAY`. 
 2. Complete class `HEAP_ARRAY`. 
 3. What is the time complexity of insert? 
-4. Show that the time complexity of delete is $O(log N)$. 
+4. Show that the time complexity of delete is $O(\log N)$. 
 5. Design and implement priority queues: 
     1. Write deferred class `PRIORITY_QUEUE`. 
     2. Write class `PRIORITY_QUEUE_HEAP` using `HEAP_ARRAY`. 

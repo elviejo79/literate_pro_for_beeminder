@@ -31,7 +31,7 @@
 - Part IV Trees
     - [15 Binary Search Trees](15_Binary_Search_Trees.md)
     - [16 Heaps](16_Heaps.md)
-    - [17 B-Trees](17_B_trees.md) -balanced trees-
+    - [17 B-Trees](17_b-trees.md) -balanced trees-
     - 18 Application: Hacker's Dictionary
 
 - Appendix A Tester Classes
