@@ -1,13 +1,6 @@
 - HOME
 
-- Preface
-    - To the Professional
-    - To the Student
-    - To the Teacher
-        - Putting It All Together
-    - The Choice of Language
-    - Prerequisites
-    - To My Friends and Colleagues
+- [Preface](0_preface)
 
 - Part I Introduction
     - 1 Object Structures
