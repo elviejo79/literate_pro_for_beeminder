@@ -32,7 +32,7 @@
     - [15 Binary Search Trees](15_Binary_Search_Trees.md)
     - [16 Heaps](16_Heaps.md)
     - [17 B-Trees](17_b-trees.md) -balanced trees-
-    - 18 Application: Hacker's Dictionary
+    - [18 Application: Hacker's Dictionary](18_application_hackers_dicitonary.md)
 
 - Appendix A Tester Classes
     - A.1 SORTABLE_LIST_TESTER
