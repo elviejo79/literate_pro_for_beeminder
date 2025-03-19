@@ -19,7 +19,7 @@
     - [11 Dictionaries and Associatons](11_Dictionaries_and_Associations.md)
     - [12 Sorting](12_Sorting.md)
     - 13 Faster Sorting
-    - 14 Faster Dictionaries
+    - [14 Faster Dictionaries](14_faster_dictionaries.md)
 
 - Part IV Trees
     - [15 Binary Search Trees](15_Binary_Search_Trees.md)
