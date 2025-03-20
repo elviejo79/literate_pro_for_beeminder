@@ -18,7 +18,7 @@
 - Part III Sorting and Searching I wont do them
     - [11 Dictionaries and Associatons](11_Dictionaries_and_Associations.md)
     - [12 Sorting](12_Sorting.md)
-    - 13 Faster Sorting
+    - [13 Faster Sorting](13_faster_sorting.md)
     - [14 Faster Dictionaries](14_faster_dictionaries.md)
 
 - Part IV Trees
