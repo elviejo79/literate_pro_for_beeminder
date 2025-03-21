@@ -300,11 +300,21 @@ in each level 2 box we find the middle,
 wait for two level 4 blank boxes, then merge N/4 items 
 (Figure 13.1c).
 
-##### TODO
+![](https://img.plantuml.biz/plantuml/svg/nLGn3i8m3Dpp2kyeGHGUq7mWAxD53KHg4vHOJ7byarQ20GP0eRtXP3kHJdUot4R6m9rbH93IUHdfXW7PUYVW1HkPKPFUQ2I0NQ4cqxwqXsdsDIcbScKWhUIZEbRI-5TMHxGCPnzAdPvo0uKBGVI1mMmRi4n3V3n-_6yH7tmb1yZGqvtwlBHPzwIrhacB-FXfiURypHoyQCbrqn4H8m00)
+
+[source](https://editor.plantuml.com/uml/nLGn3i8m3Dpp2kyeGHGUq7mWAxD53KHg4vHOJ7byarQ20GP0eRtXP3kHJdUot4R6m9rbH93IUHdfXW7PUYVW1HkPKPFUQ2I0NQ4cqxwqXsdsDIcbScKWhUIZEbRI-5TMHxGCPnzAdPvo0uKBGVI1mMmRi4n3V3n-_6yH7tmb1yZGqvtwlBHPzwIrhacB-FXfiURypHoyQCbrqn4H8m00)
+
 a. Execution trae of the first level of recursion.
+
+![](https://img.plantuml.biz/plantuml/svg/SoWkIImgISaiIKnKq7NbKi00shf0G4q2Ynqr2Wg68C88I1Y3k2PWCP89FJqz8CjFeMQ0_45rC41sq2oioXCpInJIyeiK855Md5zKek2dRwAGMPAQMqoX65tyKPAHcgUGMAAGargMcWDCho2t93iwEYeevAOMfQV2N6K4SnK2mDGf450w4Fum1DaBSXur2RhuWwmC0Wb_FqZ0SpcavgM0opyk0000)
+
+[source](https://editor.plantuml.com/uml/SoWkIImgISaiIKnKq7NbKi00shf0G4q2Ynqr2Wg68C88I1Y3k2PWCP89FJqz8CjFeMQ0_45rC41sq2oioXCpInJIyeiK855Md5zKek2dRwAGMPAQMqoX65tyKPAHcgUGMAAGargMcWDCho2t93iwEYeevAOMfQV2N6K4SnK2mDGf450w4Fum1DaBSXur2RhuWwmC0Wb_FqZ0SpcavgM0opyk0000)
 
 b. Execution trace of the first two level of recursion.
 
+![](https://img.plantuml.biz/plantuml/svg/nLJB2eD03Bpx5NClMhGUUdGFlVeFIqrRmGViXlQo7zzT9LXeeIYYEGoJ4CXCzb5OreQhchL6V8dm5OVOnvhmOuO3qW2PXrD8yw4s6v8ayQo4syd7wh6bZvUk6RVUUEfiRnZbyVp987G1syG7FwY3PZJqf2RS8xYhKafKvAYPMZklDkL1ynu-iZ0NevYMp9r4PpRfaf0-_6dTmqSgvx4cRE9ZqKCVzr-EYuyAwghXZutU)
+
+[source](https://editor.plantuml.com/uml/nLJB2eD03Bpx5NClMhGUUdGFlVeFIqrRmGViXlQo7zzT9LXeeIYYEGoJ4CXCzb5OreQhchL6V8dm5OVOnvhmOuO3qW2PXrD8yw4s6v8ayQo4syd7wh6bZvUk6RVUUEfiRnZbyVp987G1syG7FwY3PZJqf2RS8xYhKafKvAYPMZklDkL1ynu-iZ0NevYMp9r4PpRfaf0-_6dTmqSgvx4cRE9ZqKCVzr-EYuyAwghXZutU)
 
 c. Execution trace of the first three level of recursion.
 
@@ -335,7 +345,9 @@ So the tally diagram looks like Figure 13.2.
 The markers form a rectangle $O(N)$ across and $O(\log_2 N)$ high,
 for a total time complexity of $O(N log_2 N)$.
 
-##### TODO
+![](https://img.plantuml.biz/plantuml/svg/SoWkIImgISaiIKnKq7NbKi00shf0G4q2Ynqr2Wg68C88I1Y3k2PWCP89FJqz8CjFeMQ0_45rG0z_w480n3y-gMMfEGev-Ud0K0I6QBAZeoCr2QWVw18_CBkm1MAD0iWvr6GDWCUm-GlieEByeX85FtqJXSoIrDnYqiGGV8Y_84bXOFoL0qwCHaWXdPjQb9uASxSHmfsOyOfVwS365yHVXWf3F8FfGW2E0fq0g0CNCCG2dFwX8j3cud98pKi1LuK0)
+
+[source](https://editor.plantuml.com/uml/SoWkIImgISaiIKnKq7NbKi00shf0G4q2Ynqr2Wg68C88I1Y3k2PWCP89FJqz8CjFeMQ0_45rG0z_w480n3y-gMMfEGev-Ud0K0I6QBAZeoCr2QWVw18_CBkm1MAD0iWvr6GDWCUm-GlieEByeX85FtqJXSoIrDnYqiGGV8Y_84bXOFoL0qwCHaWXdPjQb9uASxSHmfsOyOfVwS365yHVXWf3F8FfGW2E0fq0g0CNCCG2dFwX8j3cud98pKi1LuK0)
 
 #### Figure 13.2 Tallying up execution markers.
 
@@ -344,7 +356,8 @@ All of those were $O(N^2)$ routines.
 If a list had a million items,
 it would take on the order of a trillion (a million million) steps to sort them with an $O(N^2)$ algorithm.
 With an $O(N \log_2 N)$ algorithm,
-it would take on the order of ... now,
+it would take on the order of ... 
+now,
 put away that calculator,
 a computer scientist should be able to do base-2
 logarithms in his or her head.
@@ -518,9 +531,17 @@ Unfortunately, if we always pick the worst p
 —either the least or the greatest object in the range—
 we wind up with Figure 13.3b, which is $O(N)$.
 
-##### TODO
+![](https://img.plantuml.biz/plantuml/svg/SoWkIImgISaiIKnKi57GrStBrorEBKWiIYp9pC-3yZCIK_BBYxaKC82sBX1Gay1YHus2WY68C08InY2k2LYCP49FJm_8ybEeeOi_w669BWGW0YqdjImr1nXQGEycEpewKfE0HGOz_8LX5yHVHk1e1Ba6qmsOYOPOTGFfBoHtO74kDZyGBvQJdqwln0wt4slkXJcEMYpSWKZR2FC19q98i0xn3AOB0JXAMmAW3kn_OW5E_r0H04jRXzIy570T1W00)
+
+[source](https://editor.plantuml.com/uml/SoWkIImgISaiIKnKi57GrStBrorEBKWiIYp9pC-3yZCIK_BBYxaKC82sBX1Gay1YHus2WY68C08InY2k2LYCP49FJm_8ybEeeOi_w669BWGW0YqdjImr1nXQGEycEpewKfE0HGOz_8LX5yHVHk1e1Ba6qmsOYOPOTGFfBoHtO74kDZyGBvQJdqwln0wt4slkXJcEMYpSWKZR2FC19q98i0xn3AOB0JXAMmAW3kn_OW5E_r0H04jRXzIy570T1W00)
+
+
 
 a. Best case: the median is always picked as the pivot.
+
+`![](https://img.plantuml.biz/plantuml/svg/tTSn3eCW5CRntLEm6qXgUm2vGEz0AaCJqw4bdJnyKL9DAoh82_dY6rxKXVpykrY_Z7gQvcwKOWMRJSdjK2xF6HrZftvLTftxsylmB7e98UpLbNLP73aEuMwcbzRgjsxjsxBScvIISdrZv73DpdAkwg0kwbxZDt-SNYC9mKNJwvU4u4hkvI4Xk7RsMjB0kE9xRPCGN56z0aa8hj1UCIG4Lq2lQ1A2QxtNFXA2Qx5N0Wd1vUkLIa9m_VKY8I6ufbvqfAmkxgOiQlreXd_a3m00)
+
+[source](https://editor.plantuml.com/uml/tTSn3eCW5CRntLEm6qXgUm2vGEz0AaCJqw4bdJnyKL9DAoh82_dY6rxKXVpykrY_Z7gQvcwKOWMRJSdjK2xF6HrZftvLTftxsylmB7e98UpLbNLP73aEuMwcbzRgjsxjsxBScvIISdrZv73DpdAkwg0kwbxZDt-SNYC9mKNJwvU4u4hkvI4Xk7RsMjB0kE9xRPCGN56z0aa8hj1UCIG4Lq2lQ1A2QxtNFXA2Qx5N0Wd1vUkLIa9m_VKY8I6ufbvqfAmkxgOiQlreXd_a3m00)
 
 
 b. Worst case: the least item is always picked as the pivot.
@@ -560,6 +581,7 @@ the middle, and the rightmost items, and pick the median of just those three.
 The partitioning of the range is rather straightforward:
 
 1. Scan the range from left to right until an item that is “>=” than the pivot is found.
+
 2. Scan the range from right to left until an item that is “<=” than the pivot is found.
 3. Swap those two items.
 4. Repeat until the left-to-right scan meets the right-to-left scan.
@@ -693,25 +715,46 @@ The next thing we do is get the pivot out of the way for the time being,
 by swapping it with the rightmost item still to be partitioned
 —the one tracked by local entities of quick_sort position `rightmost—1` (Figure 13.4b).
 
-##### TODO
+![](https://img.plantuml.biz/plantuml/svg/VPB1JiCm38RlUGghHwHDAr1WrQZs2cCFK7cjrqLDavAu28JsxiGjQX67-P0uN_BRZfDzOFGyT4P5wx5giI5u7tJLbi5vXjtkZIf6snWg2lXM2g9rs0DwNsgcBaG8lvR2Qm5UDyuGp_1UOAWyTgwXcJu8hP5vgDePFWf4JCEYpiPpGrsx6Jq9kiIgJuxPB26VXP_rOD5_pV1bpDvxmjRGWhU2JzhMV_JfHc1hiJVkF5Lm7KSbzqsCgz00MTQiAII00Gv7kNodwnW6H9mfC7JcCWQcpqJ8Hab3BlzGhpySHr_1rCBeNPKw7FDyMj-jLiNIOQMiOu947cJCAqwPgcc2zPXWlLu4UNvpCxkft4WfqVPaQ_aNFm00)
+
+[source](https://editor.plantuml.com/uml/VPB1JiCm38RlUGghHwHDAr1WrQZs2cCFK7cjrqLDavAu28JsxiGjQX67-P0uN_BRZfDzOFGyT4P5wx5giI5u7tJLbi5vXjtkZIf6snWg2lXM2g9rs0DwNsgcBaG8lvR2Qm5UDyuGp_1UOAWyTgwXcJu8hP5vgDePFWf4JCEYpiPpGrsx6Jq9kiIgJuxPB26VXP_rOD5_pV1bpDvxmjRGWhU2JzhMV_JfHc1hiJVkF5Lm7KSbzqsCgz00MTQiAII00Gv7kNodwnW6H9mfC7JcCWQcpqJ8Hab3BlzGhpySHr_1rCBeNPKw7FDyMj-jLiNIOQMiOu947cJCAqwPgcc2zPXWlLu4UNvpCxkft4WfqVPaQ_aNFm00)
 
 a. The middle is located. It will be sorted with the leftmost and rightmost items in the range.
 
 
-##### TODO
+![](https://img.plantuml.biz/plantuml/svg/TP9BRi8m48RtFiKeoqeWGajR8eYu0kK0Q4Y6OCMnKtlIXohkNazI9QLI_uLbV_CUUHSOFNUDKL4j5ZLM1A-TBkfZS9vXitcXWj5MXl8SlfI2g0PRGE-Fcga94SAFKjZcK7PbwKQq51GAZushQAJtlICoTqKzmWU1Y6dW4Qq4rHPRuyuJVHHwYMsV7BEPiZu9F-lEelySuNFVGEi9QqCJNWi-QLl-YayN0hskdA6XshK_bSoR65UW0RAiMLD800Fi3p9yeykO1IHsfS3GcOynBtqaGXPA4bx-e5Q_EOvt1SCAu-sgrFwGPSFxRZRBfmttXY74tHYoRAMKTKoGX7Ti-vxiKjabpFkYy_cjxp-6jHIFsf4jvITy0m00)
+
+[source](https://editor.plantuml.com/uml/TP9BRi8m48RtFiKeoqeWGajR8eYu0kK0Q4Y6OCMnKtlIXohkNazI9QLI_uLbV_CUUHSOFNUDKL4j5ZLM1A-TBkfZS9vXitcXWj5MXl8SlfI2g0PRGE-Fcga94SAFKjZcK7PbwKQq51GAZushQAJtlICoTqKzmWU1Y6dW4Qq4rHPRuyuJVHHwYMsV7BEPiZu9F-lEelySuNFVGEi9QqCJNWi-QLl-YayN0hskdA6XshK_bSoR65UW0RAiMLD800Fi3p9yeykO1IHsfS3GcOynBtqaGXPA4bx-e5Q_EOvt1SCAu-sgrFwGPSFxRZRBfmttXY74tHYoRAMKTKoGX7Ti-vxiKjabpFkYy_cjxp-6jHIFsf4jvITy0m00)
 
 b. The median of the leftmost, middle, and rightmost items is now the pivot.
 The unpartitioned section has narrowed by one on each side,
 since the leftmost and rightmost items are where they belong. 
 The pivot will be swapped with the rightmost unpartitioned item to get it out of the way.
 
+![](https://img.plantuml.biz/plantuml/svg/RP9TJiCm3CVVSmfhZqYTs62mLQFQ5SOEK7cjrqLDavAw28HsT-8KsWtXXoR-kVxxGzbrZ9xxngXWBHOrLWHllIxgl7EUORjzfOBHLeQo3BwKWc0Dje3UvvgfwGA47rl0ImPbNvPkH4j1NU6nSHMDz27-YCnzKO_mKI3YekCHhGJL5blZJXDz4deERHyTivbKduMVT6_HVuvm7HjeFM5jQC8RmKTjowlynRr0hojdQAXsYLybyywCAz00MTQigPi1Th0_oF2DBeCAIEvAWQ4Jvq6NFcP2xfK8dl-WLhyx3dS5mmh3xQBK_f2cWt-N9DcquHWOKjnD84qtIbd75BeBPHDsIImM5eusTXYxOPT7h6uycCTZVYst_9MB8T6Jb4bk62Ke25OttdzoQvags8viAK_i6m00)
+
+[source](https://editor.plantuml.com/uml/RP9TJiCm3CVVSmfhZqYTs62mLQFQ5SOEK7cjrqLDavAw28HsT-8KsWtXXoR-kVxxGzbrZ9xxngXWBHOrLWHllIxgl7EUORjzfOBHLeQo3BwKWc0Dje3UvvgfwGA47rl0ImPbNvPkH4j1NU6nSHMDz27-YCnzKO_mKI3YekCHhGJL5blZJXDz4deERHyTivbKduMVT6_HVuvm7HjeFM5jQC8RmKTjowlynRr0hojdQAXsYLybyywCAz00MTQigPi1Th0_oF2DBeCAIEvAWQ4Jvq6NFcP2xfK8dl-WLhyx3dS5mmh3xQBK_f2cWt-N9DcquHWOKjnD84qtIbd75BeBPHDsIImM5eusTXYxOPT7h6uycCTZVYst_9MB8T6Jb4bk62Ke25OttdzoQvags8viAK_i6m00)
+
 c. With the pivot out of the way, scan left-to-right and then right-to-left for out-of-place items.
 
+![](https://img.plantuml.biz/plantuml/svg/VP9BRi8m48RtFiKeoqeWeAMKY4PSWNA0Q4Y6OCMnKtlIXohkNazI9RIB_Wjx_8tdPNaV63rtZL5HBHOrLWIldIxgF3ZFiDkzKC5eAqDP1bzAGLI3BQ3tkMPgGeJmeoKyPr1sPUb6j18K2e-DgsYaz_r5PEwAUeGF0X6NWKUq5bHRR8qxJ_HHw2MsVNBCPigw4NxMdKN_ESAdle7M4zQ69hmLVDAsl8bVBWHwNJb3GxLhlogPDp6kG0DaMREca006E1nb-4QNCGj8x5g1eJFdCIzz948MIX9U_g1MlpcEjeBX2QDrLUfmJDFXV3URPTCBzuuXnFrofEbMAUkO80dlsFOzYP6lrB31l2y-dz_6_ElSI2DHUxAb_8fl)
+
+[source](https://editor.plantuml.com/uml/VP9BRi8m48RtFiKeoqeWeAMKY4PSWNA0Q4Y6OCMnKtlIXohkNazI9RIB_Wjx_8tdPNaV63rtZL5HBHOrLWIldIxgF3ZFiDkzKC5eAqDP1bzAGLI3BQ3tkMPgGeJmeoKyPr1sPUb6j18K2e-DgsYaz_r5PEwAUeGF0X6NWKUq5bHRR8qxJ_HHw2MsVNBCPigw4NxMdKN_ESAdle7M4zQ69hmLVDAsl8bVBWHwNJb3GxLhlogPDp6kG0DaMREca006E1nb-4QNCGj8x5g1eJFdCIzz948MIX9U_g1MlpcEjeBX2QDrLUfmJDFXV3URPTCBzuuXnFrofEbMAUkO80dlsFOzYP6lrB31l2y-dz_6_ElSI2DHUxAb_8fl)
+
 d. An item >=pivot was found to the left of an item <=pivot. They will be swapped.
+
+![](https://img.plantuml.biz/plantuml/svg/XPBTRi8m38NlynHMBoU11WmO5Qju1SO3LAOD9MgQTAcx7qsy--9qQYdQX2zA_CK-nuxODOIEsaeB7pLc9HOItbgLbMbZ7S5s-oepGbDecIJmBGJugB06T2vL9Al6G_YD6RmaaBTvRdiqPzHa3YjRo9ukGY4IjLdPmoU6YBE6UhHaL1gijJqDTCNqxCS-MY8zgAwPdrHhq7try3aCK3k9fPO3tZ0-AfDVzSyU6JfLM2qxjqlu2jutqZP33TAG8YMR2B21_O6NhrJkLO1xbmAqF57gTULdnEHHiE3v1jNgtP8_2-YUq9ykGkmFSTpb3vD9ChnmkEXQxEWYZZT264iIeYP3qpa1sJ14cB3p9fio4QCCfY6TNikjxvUiHewXoXk6kk0OzlVzWOXHzfVS_7x9uFY1TV3WGxeGtGzCMM5wiyV_Tnj-QXyxQNB-t_y0)
+
+[source](https://editor.plantuml.com/uml/XPBTRi8m38NlynHMBoU11WmO5Qju1SO3LAOD9MgQTAcx7qsy--9qQYdQX2zA_CK-nuxODOIEsaeB7pLc9HOItbgLbMbZ7S5s-oepGbDecIJmBGJugB06T2vL9Al6G_YD6RmaaBTvRdiqPzHa3YjRo9ukGY4IjLdPmoU6YBE6UhHaL1gijJqDTCNqxCS-MY8zgAwPdrHhq7try3aCK3k9fPO3tZ0-AfDVzSyU6JfLM2qxjqlu2jutqZP33TAG8YMR2B21_O6NhrJkLO1xbmAqF57gTULdnEHHiE3v1jNgtP8_2-YUq9ykGkmFSTpb3vD9ChnmkEXQxEWYZZT264iIeYP3qpa1sJ14cB3p9fio4QCCfY6TNikjxvUiHewXoXk6kk0OzlVzWOXHzfVS_7x9uFY1TV3WGxeGtGzCMM5wiyV_Tnj-QXyxQNB-t_y0)
 
 e. In an attempt to find two more items out of place, the scans cross.
 Where the left-to-right scan stopped is the leftmost item of the `>= pivot` subrange.
 It will be swapped with the pivot.
+
+
+![](https://img.plantuml.biz/plantuml/svg/TPBTJiCm38NlynHMBv4shS1-gBPghp3s09NNPbtKD2c9Yq1exqwSGZkGveie-PnpR4VPUq97VQj5Y0xB1ci9Rxqgcy9RHx3TligIqDHQvZby2G4XMkm0dIiKoTO723-HmYw7ggygEw97HhvqsDfQZlGfNaIYlcn6-CmGCVKqeYMZnc2dxNcYAwQNqFR94kd9TStyh7g3xdE4czX0voGsMaxuXV59cUf6douOEbLRBOTgrxWAdZVHjaGDqf0Y9Nq2wE5mvE5RLGKNOErIW9PdAeAl_4YOB0GRNlwXJhrR2di1mnE6tLM8mp7BXlF3R9PFBnmJWyJ-IMJPMWXZIK82sztW6XlJL7I25vZ7wlDRJNeti_fr6uhbEuXkDRlLTpIRkvbq8NYg47jfAlvYtm00)
+
+[source](https://editor.plantuml.com/uml/TPBTJiCm38NlynHMBv4shS1-gBPghp3s09NNPbtKD2c9Yq1exqwSGZkGveie-PnpR4VPUq97VQj5Y0xB1ci9Rxqgcy9RHx3TligIqDHQvZby2G4XMkm0dIiKoTO723-HmYw7ggygEw97HhvqsDfQZlGfNaIYlcn6-CmGCVKqeYMZnc2dxNcYAwQNqFR94kd9TStyh7g3xdE4czX0voGsMaxuXV59cUf6douOEbLRBOTgrxWAdZVHjaGDqf0Y9Nq2wE5mvE5RLGKNOErIW9PdAeAl_4YOB0GRNlwXJhrR2di1mnE6tLM8mp7BXlF3R9PFBnmJWyJ-IMJPMWXZIK82sztW6XlJL7I25vZ7wlDRJNeti_fr6uhbEuXkDRlLTpIRkvbq8NYg47jfAlvYtm00)
 
 f. The range has been partitioned.
 
