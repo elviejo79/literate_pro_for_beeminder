@@ -3,7 +3,7 @@
 - [Preface](0_preface.md)
 
 - Part I Introduction
-    - 1 Object Structures
+    - [1 Object Structures](1_object_structures.md)
     - [2 Objects and Classes](2_Objects_and_Classes.md)
     - [3 Pairs](3_Pairs.md)
     - [4 Subclasses and Subcontracts](4_Subclasses_and_Subcontracts.md)
