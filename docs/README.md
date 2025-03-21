@@ -10,6 +10,6 @@ Jacob Gore
 
 
 This is the on-line edition of the ObjectStructures book by Jacob Gore.
-
-As we work towards a second edition, with interactive examples and algorithm animations.
-In the mean time it is a translation from Latex to Markdown and the diagrams remade with [PlantUML](https://plantuml.com).
+Currently it is only a markdown version of the original text with diagrams in [PlantUML](https://plantuml.com).
+But, we (Jacob Gore and [Alejandro Garcia](https://elviejo79.github.io)  are working towards a second edition,
+with interactive examples and algorithm animations.
